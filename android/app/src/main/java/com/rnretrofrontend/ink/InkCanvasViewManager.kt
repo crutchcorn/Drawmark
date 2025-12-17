@@ -8,6 +8,9 @@
 package com.rnretrofrontend.ink
 
 import android.graphics.Color
+import android.view.Choreographer
+import android.view.View
+import android.view.ViewGroup
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableArray
@@ -48,6 +51,40 @@ class InkCanvasViewManager(
         return MapBuilder.builder<String, Any>()
             .put("onStrokesChange", MapBuilder.of("registrationName", "onStrokesChange"))
             .build()
+    }
+
+    override fun onAfterUpdateTransaction(view: InkCanvasView) {
+        super.onAfterUpdateTransaction(view)
+        
+        // Force layout update after React Native updates the view
+        Choreographer.getInstance().postFrameCallback {
+            manuallyLayoutChildren(view)
+            view.invalidate()
+        }
+    }
+
+    /**
+     * Manually layout the view and its children since React Native doesn't 
+     * automatically trigger Android's layout pass for native views.
+     */
+    private fun manuallyLayoutChildren(view: ViewGroup) {
+        val width = view.width
+        val height = view.height
+
+        view.measure(
+            View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY)
+        )
+        view.layout(0, 0, width, height)
+        
+        for (i in 0 until view.childCount) {
+            val child = view.getChildAt(i)
+            child.measure(
+                View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY)
+            )
+            child.layout(0, 0, width, height)
+        }
     }
 
     @ReactProp(name = "brushColor")

@@ -12,6 +12,7 @@ import android.content.Context
 import android.graphics.Matrix
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
@@ -24,7 +25,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.ink.authoring.InProgressStrokeId
 import androidx.ink.authoring.InProgressStrokesFinishedListener
@@ -39,13 +39,15 @@ import androidx.input.motionprediction.MotionEventPredictor
  * InkCanvasView is a FrameLayout that embeds a Jetpack Compose drawing surface
  * using the Android Ink API for low-latency stylus/touch input.
  */
+@SuppressLint("ViewConstructor")
 class InkCanvasView(context: Context) : FrameLayout(context), InProgressStrokesFinishedListener {
 
+    private val composeView: ComposeView
     private val inProgressStrokesView = InProgressStrokesView(context)
     private val finishedStrokesState = mutableStateOf(emptySet<Stroke>())
     private val canvasStrokeRenderer = CanvasStrokeRenderer.create()
     private val strokeSerializer = StrokeSerializer()
-    private var composeView: ComposeView? = null
+    private var wasDetached = false
 
     // Callback for stroke changes
     var onStrokesChange: ((String) -> Unit)? = null
@@ -57,26 +59,52 @@ class InkCanvasView(context: Context) : FrameLayout(context), InProgressStrokesF
 
     init {
         inProgressStrokesView.addFinishedStrokesListener(this)
-        setupComposeView()
-    }
-
-    private fun setupComposeView() {
-        composeView = ComposeView(context).apply {
-            // Dispose composition when view is detached - clean slate each time
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
-            setContent {
-                InkDrawingSurface(
-                    inProgressStrokesView = inProgressStrokesView,
-                    finishedStrokesState = finishedStrokesState.value,
-                    canvasStrokeRenderer = canvasStrokeRenderer,
-                    getBrush = { createBrush() }
-                )
-            }
-        }
+        composeView = ComposeView(context)
+        setComposeContent()
         addView(composeView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
     }
 
+    private fun setComposeContent() {
+        composeView.setContent {
+            InkDrawingSurface(
+                inProgressStrokesView = inProgressStrokesView,
+                finishedStrokesState = finishedStrokesState.value,
+                canvasStrokeRenderer = canvasStrokeRenderer,
+                getBrush = { createBrush() }
+            )
+        }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        
+        // Only recreate composition if we were previously detached (not first attach)
+        if (wasDetached) {
+            // Re-add the listener since we removed it on detach
+            inProgressStrokesView.addFinishedStrokesListener(this)
+            // Post to ensure ComposeView is attached before setting content
+            post {
+                if (composeView.isAttachedToWindow) {
+                    // Dispose old composition first, then set new content
+                    composeView.disposeComposition()
+                    setComposeContent()
+                    
+                    // Force a full layout pass to trigger initial render
+                    val width = width
+                    val height = height
+                    composeView.measure(
+                        MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
+                    )
+                    composeView.layout(0, 0, width, height)
+                    composeView.invalidate()
+                }
+            }
+        }
+    }
+
     override fun onDetachedFromWindow() {
+        wasDetached = true
         // Clean up the listener to avoid memory leaks
         inProgressStrokesView.removeFinishedStrokesListener(this)
         super.onDetachedFromWindow()
@@ -150,7 +178,7 @@ class InkCanvasView(context: Context) : FrameLayout(context), InProgressStrokesF
     }
 
     override fun onStrokesFinished(strokes: Map<InProgressStrokeId, Stroke>) {
-        finishedStrokesState.value = finishedStrokesState.value + strokes.values
+        finishedStrokesState.value += strokes.values
         inProgressStrokesView.removeFinishedStrokes(strokes.keys)
         notifyStrokesChanged()
     }
@@ -174,7 +202,7 @@ private fun InkDrawingSurface(
                 val rootView = FrameLayout(context)
                 
                 // Remove from existing parent if any (needed for view reuse)
-                (inProgressStrokesView.parent as? android.view.ViewGroup)?.removeView(inProgressStrokesView)
+                (inProgressStrokesView.parent as? ViewGroup)?.removeView(inProgressStrokesView)
                 
                 inProgressStrokesView.apply {
                     layoutParams = FrameLayout.LayoutParams(
