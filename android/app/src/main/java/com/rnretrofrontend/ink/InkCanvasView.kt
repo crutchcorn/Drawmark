@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.ink.authoring.InProgressStrokeId
 import androidx.ink.authoring.InProgressStrokesFinishedListener
@@ -44,6 +45,7 @@ class InkCanvasView(context: Context) : FrameLayout(context), InProgressStrokesF
     private val finishedStrokesState = mutableStateOf(emptySet<Stroke>())
     private val canvasStrokeRenderer = CanvasStrokeRenderer.create()
     private val strokeSerializer = StrokeSerializer()
+    private var composeView: ComposeView? = null
 
     // Callback for stroke changes
     var onStrokesChange: ((String) -> Unit)? = null
@@ -55,8 +57,13 @@ class InkCanvasView(context: Context) : FrameLayout(context), InProgressStrokesF
 
     init {
         inProgressStrokesView.addFinishedStrokesListener(this)
+        setupComposeView()
+    }
 
-        val composeView = ComposeView(context).apply {
+    private fun setupComposeView() {
+        composeView = ComposeView(context).apply {
+            // Dispose composition when view is detached - clean slate each time
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
             setContent {
                 InkDrawingSurface(
                     inProgressStrokesView = inProgressStrokesView,
@@ -66,8 +73,13 @@ class InkCanvasView(context: Context) : FrameLayout(context), InProgressStrokesF
                 )
             }
         }
-
         addView(composeView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+    }
+
+    override fun onDetachedFromWindow() {
+        // Clean up the listener to avoid memory leaks
+        inProgressStrokesView.removeFinishedStrokesListener(this)
+        super.onDetachedFromWindow()
     }
 
     private fun createBrush(): Brush {
@@ -117,6 +129,7 @@ class InkCanvasView(context: Context) : FrameLayout(context), InProgressStrokesF
      * Loads strokes from a serialized JSON string.
      */
     fun loadStrokes(json: String) {
+        if (json.isEmpty()) return
         val strokes = strokeSerializer.deserializeStrokes(json)
         finishedStrokesState.value = strokes
     }
