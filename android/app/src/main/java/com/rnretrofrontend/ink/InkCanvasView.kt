@@ -172,6 +172,10 @@ private fun InkDrawingSurface(
             modifier = Modifier.fillMaxSize(),
             factory = { context ->
                 val rootView = FrameLayout(context)
+                
+                // Remove from existing parent if any (needed for view reuse)
+                (inProgressStrokesView.parent as? android.view.ViewGroup)?.removeView(inProgressStrokesView)
+                
                 inProgressStrokesView.apply {
                     layoutParams = FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
