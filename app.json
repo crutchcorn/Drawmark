@@ -1,0 +1,8 @@
+{
+  "name": "RNRetroFrontend",
+  "displayName": "RNRetroFrontend",
+  "plugins": [
+    "expo-sqlite",
+    "expo-asset"
+  ]
+}
