@@ -43,6 +43,10 @@ class InkCanvasView(context: Context) : FrameLayout(context), InProgressStrokesF
     private val inProgressStrokesView = InProgressStrokesView(context)
     private val finishedStrokesState = mutableStateOf(emptySet<Stroke>())
     private val canvasStrokeRenderer = CanvasStrokeRenderer.create()
+    private val strokeSerializer = StrokeSerializer()
+
+    // Callback for stroke changes
+    var onStrokesChange: ((String) -> Unit)? = null
 
     // Brush configuration
     private var brushColor: Int = Color.Black.toArgb()
@@ -106,11 +110,36 @@ class InkCanvasView(context: Context) : FrameLayout(context), InProgressStrokesF
      */
     fun clearCanvas() {
         finishedStrokesState.value = emptySet()
+        notifyStrokesChanged()
+    }
+
+    /**
+     * Loads strokes from a serialized JSON string.
+     */
+    fun loadStrokes(json: String) {
+        val strokes = strokeSerializer.deserializeStrokes(json)
+        finishedStrokesState.value = strokes
+    }
+
+    /**
+     * Gets the current strokes as a serialized JSON string.
+     */
+    fun getSerializedStrokes(): String {
+        return strokeSerializer.serializeStrokes(finishedStrokesState.value)
+    }
+
+    /**
+     * Notifies the listener that strokes have changed.
+     */
+    private fun notifyStrokesChanged() {
+        val serialized = strokeSerializer.serializeStrokes(finishedStrokesState.value)
+        onStrokesChange?.invoke(serialized)
     }
 
     override fun onStrokesFinished(strokes: Map<InProgressStrokeId, Stroke>) {
         finishedStrokesState.value = finishedStrokesState.value + strokes.values
         inProgressStrokesView.removeFinishedStrokes(strokes.keys)
+        notifyStrokesChanged()
     }
 }
 

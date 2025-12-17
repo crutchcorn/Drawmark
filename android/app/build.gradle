@@ -140,6 +140,9 @@ dependencies {
     implementation("androidx.ink:ink-rendering:$ink_version")
     implementation("androidx.ink:ink-strokes:$ink_version")
 
+    // Gson for JSON serialization
+    implementation("com.google.code.gson:gson:2.11.0")
+
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {
