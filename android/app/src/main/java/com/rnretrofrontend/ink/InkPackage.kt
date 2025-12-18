@@ -3,7 +3,7 @@
 // RNRetroFrontend - Ink Package
 // InkPackage.kt
 //
-// React Native package registration for InkCanvasViewManager.
+// React Native package registration for InkCanvasViewManager and InkEditorViewManager.
 
 package com.rnretrofrontend.ink
 
@@ -19,6 +19,9 @@ class InkPackage : ReactPackage {
     }
 
     override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
-        return listOf(InkCanvasViewManager(reactContext))
+        return listOf(
+            InkCanvasViewManager(reactContext),
+            InkEditorViewManager(reactContext)
+        )
     }
 }

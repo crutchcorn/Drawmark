@@ -2,12 +2,12 @@ import { useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { db } from '../constants/db';
 import { getInkCanvasState, saveInkCanvasState } from '../services/inkCanvas';
-import type { InkCanvasRef } from '../components/InkCanvas';
+import type { InkEditorRef } from '../components/InkEditor';
 
 const QUERY_KEY_PREFIX = 'inkCanvasState';
 
 export function useInkCanvasPersistence(canvasId: string) {
-  const canvasRef = useRef<InkCanvasRef>(null);
+  const canvasRef = useRef<InkEditorRef>(null);
   const queryClient = useQueryClient();
 
   // Query to load initial strokes
