@@ -1,6 +1,8 @@
 pluginManagement {
-  includeBuild("../node_modules/@react-native/gradle-plugin")
-  includeBuild("../node_modules/expo-modules-autolinking/android/expo-gradle-plugin")
+  includeBuild("../../../node_modules/@react-native/gradle-plugin")
+  includeBuild("../../../node_modules/expo-modules-autolinking/android/expo-gradle-plugin") {
+    name = "expo-modules-autolinking-plugin"
+  }
 }
 plugins {
   id("com.facebook.react.settings")
@@ -10,4 +12,4 @@ extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autoli
 expoAutolinking.useExpoModules()
 rootProject.name = 'Drawmark'
 include ':app'
-includeBuild('../node_modules/@react-native/gradle-plugin')
+includeBuild('../../../node_modules/@react-native/gradle-plugin')
