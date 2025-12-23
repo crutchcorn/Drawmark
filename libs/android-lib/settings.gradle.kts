@@ -18,8 +18,11 @@ dependencyResolutionManagement {
         mavenCentral()
     }
     versionCatalogs {
-        create("libs") {
+        create("shared") {
             from(files("../../gradle/libs.versions.toml"))
+        }
+        create("libLocal") {
+            from(files("gradle/libs.versions.toml"))
         }
     }
 }

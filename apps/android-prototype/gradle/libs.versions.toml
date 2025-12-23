@@ -1,0 +1,8 @@
+# App-specific dependencies for android-prototype
+
+[versions]
+activityCompose = "1.12.2"
+
+[libraries]
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+

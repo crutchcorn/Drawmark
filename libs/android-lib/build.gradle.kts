@@ -1,8 +1,8 @@
 plugins {
     id("dev.nx.gradle.project-graph") version("0.1.10")
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
+    alias(shared.plugins.android.library)
+    alias(shared.plugins.kotlin.android)
+    alias(shared.plugins.kotlin.compose)
 }
 
 group = "app.drawmark.android"
@@ -44,33 +44,33 @@ kotlin {
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
+    implementation(shared.androidx.core.ktx)
+    implementation(shared.androidx.lifecycle.runtime.ktx)
+    implementation(platform(shared.androidx.compose.bom))
+    implementation(shared.androidx.compose.ui)
+    implementation(shared.androidx.compose.ui.graphics)
+    implementation(shared.androidx.compose.ui.tooling.preview)
+    implementation(shared.androidx.compose.material3)
 
     // Motion Event Predictor for low-latency stylus input
-    implementation(libs.androidx.input.motionprediction)
+    implementation(libLocal.androidx.input.motionprediction)
 
     // Android Ink API dependencies
-    implementation(libs.androidx.ink.authoring)
-    implementation(libs.androidx.ink.brush)
-    implementation(libs.androidx.ink.geometry)
-    implementation(libs.androidx.ink.nativeloader)
-    implementation(libs.androidx.ink.rendering)
-    implementation(libs.androidx.ink.strokes)
+    implementation(libLocal.androidx.ink.authoring)
+    implementation(libLocal.androidx.ink.brush)
+    implementation(libLocal.androidx.ink.geometry)
+    implementation(libLocal.androidx.ink.nativeloader)
+    implementation(libLocal.androidx.ink.rendering)
+    implementation(libLocal.androidx.ink.strokes)
 
     // Gson for JSON serialization
-    implementation(libs.gson)
+    implementation(libLocal.gson)
 
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
+    testImplementation(shared.junit)
+    androidTestImplementation(shared.androidx.junit)
+    androidTestImplementation(shared.androidx.espresso.core)
+    androidTestImplementation(platform(shared.androidx.compose.bom))
+    androidTestImplementation(shared.androidx.compose.ui.test.junit4)
+    debugImplementation(shared.androidx.compose.ui.tooling)
+    debugImplementation(shared.androidx.compose.ui.test.manifest)
 }
