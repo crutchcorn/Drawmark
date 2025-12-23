@@ -17,14 +17,11 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
     }
-}
-
-rootProject.name = "Drawmark Android(Prototype"
-include(":app")
-
-// Include the android-lib library from libs folder
-includeBuild("../../libs/android-lib") {
-    dependencySubstitution {
-        substitute(module("app.drawmark.android:lib")).using(project(":"))
+    versionCatalogs {
+        create("libs") {
+            from(files("../../apps/android-prototype/gradle/libs.versions.toml"))
+        }
     }
 }
+
+rootProject.name = "android-lib"

@@ -1,25 +1,22 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
-    alias(libs.plugins.android.application)
+    id("dev.nx.gradle.project-graph") version("0.1.10")
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
 
+group = "app.drawmark.android"
+version = "0.0.1"
+
 android {
-    namespace = "app.drawmark.android.prototype"
-    compileSdk {
-        version = release(36)
-    }
+    namespace = "app.drawmark.android.lib"
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "app.drawmark.android.prototype"
         minSdk = 33
-        targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -40,39 +37,20 @@ android {
     }
 }
 
-
 kotlin {
     compilerOptions {
-        jvmTarget = JvmTarget.fromTarget("11")
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget("11")
     }
 }
 
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-
-    // Motion Event Predictor for low-latency stylus input
-    implementation(libs.androidx.input.motionprediction)
-
-    // Android Ink API dependencies
-    implementation(libs.androidx.ink.authoring)
-    implementation(libs.androidx.ink.brush)
-    implementation(libs.androidx.ink.geometry)
-    implementation(libs.androidx.ink.nativeloader)
-    implementation(libs.androidx.ink.rendering)
-    implementation(libs.androidx.ink.strokes)
-
-    // Gson for JSON serialization
-    implementation(libs.gson)
-
-    // Internal library from libs folder
-    implementation("app.drawmark.android:lib")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
