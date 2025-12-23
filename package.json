@@ -1,9 +1,10 @@
 {
-  "name": "drawmark",
+  "name": "drawmark-root",
   "version": "0.0.1",
   "description": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "nx run-many --targets=eslint:lint",
+    "test:js": "nx run-many --targets=jest:test",
     "lint:sherif": "sherif"
   },
   "packageManager": "pnpm@10.23.0",
