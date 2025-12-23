@@ -11,6 +11,7 @@ import android.graphics.Color
 import android.view.Choreographer
 import android.view.View
 import android.view.ViewGroup
+import app.drawmark.android.lib.ink.InkEditorView
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableArray

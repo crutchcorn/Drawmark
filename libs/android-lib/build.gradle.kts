@@ -13,7 +13,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        minSdk = 33
+        minSdk = 24
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -53,18 +53,18 @@ dependencies {
     implementation(shared.androidx.compose.material3)
 
     // Motion Event Predictor for low-latency stylus input
-    implementation(libLocal.androidx.input.motionprediction)
+    api(libLocal.androidx.input.motionprediction)
 
-    // Android Ink API dependencies
-    implementation(libLocal.androidx.ink.authoring)
-    implementation(libLocal.androidx.ink.brush)
-    implementation(libLocal.androidx.ink.geometry)
-    implementation(libLocal.androidx.ink.nativeloader)
-    implementation(libLocal.androidx.ink.rendering)
-    implementation(libLocal.androidx.ink.strokes)
+    // Android Ink API dependencies (exposed as api for consumers that need these types)
+    api(libLocal.androidx.ink.authoring)
+    api(libLocal.androidx.ink.brush)
+    api(libLocal.androidx.ink.geometry)
+    api(libLocal.androidx.ink.nativeloader)
+    api(libLocal.androidx.ink.rendering)
+    api(libLocal.androidx.ink.strokes)
 
     // Gson for JSON serialization
-    implementation(libLocal.gson)
+    api(libLocal.gson)
 
     testImplementation(shared.junit)
     androidTestImplementation(shared.androidx.junit)

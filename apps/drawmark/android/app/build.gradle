@@ -125,20 +125,8 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.activity:activity-compose:1.12.2")
 
-    // Motion Event Predictor for low-latency stylus input
-    implementation("androidx.input:input-motionprediction:1.0.0")
-
-    // Android Ink API dependencies
-    def ink_version = "1.0.0"
-    implementation("androidx.ink:ink-authoring:$ink_version")
-    implementation("androidx.ink:ink-brush:$ink_version")
-    implementation("androidx.ink:ink-geometry:$ink_version")
-    implementation("androidx.ink:ink-nativeloader:$ink_version")
-    implementation("androidx.ink:ink-rendering:$ink_version")
-    implementation("androidx.ink:ink-strokes:$ink_version")
-
-    // Gson for JSON serialization
-    implementation("com.google.code.gson:gson:2.13.2")
+    // Shared android-lib (includes Ink API, Gson, etc.)
+    implementation("app.drawmark.android:lib")
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

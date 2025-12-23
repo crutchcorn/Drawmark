@@ -15,3 +15,10 @@ expoAutolinking.useExpoModules()
 rootProject.name = 'Drawmark'
 include ':app'
 includeBuild('../../../node_modules/@react-native/gradle-plugin')
+
+// Include the shared android-lib library
+includeBuild("../../../libs/android-lib") {
+    dependencySubstitution {
+        substitute module("app.drawmark.android:lib") using project(":")
+    }
+}
