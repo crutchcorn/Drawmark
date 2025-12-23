@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 //
-// RNRetroFrontend - Ink Editor View
+// Drawmark - Ink Editor View
 // InkEditorView.kt
 //
 // A Jetpack Compose-based drawing surface using the Android Ink API.
 // This view supports editing (drawing) strokes.
 
-package com.rnretrofrontend.ink
+package app.drawmark.ink
 
 import android.annotation.SuppressLint
 import android.content.Context

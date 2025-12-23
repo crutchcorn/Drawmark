@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "RNRetroFrontend.app"
-               BlueprintName = "RNRetroFrontend"
-               ReferencedContainer = "container:RNRetroFrontend.xcodeproj">
+               BuildableName = "Drawmark.app"
+               BlueprintName = "Drawmark"
+               ReferencedContainer = "container:Drawmark.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "RNRetroFrontendTests.xctest"
-               BlueprintName = "RNRetroFrontendTests"
-               ReferencedContainer = "container:RNRetroFrontend.xcodeproj">
+               BuildableName = "DrawmarkTests.xctest"
+               BlueprintName = "DrawmarkTests"
+               ReferencedContainer = "container:Drawmark.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "RNRetroFrontend.app"
-            BlueprintName = "RNRetroFrontend"
-            ReferencedContainer = "container:RNRetroFrontend.xcodeproj">
+            BuildableName = "Drawmark.app"
+            BlueprintName = "Drawmark"
+            ReferencedContainer = "container:Drawmark.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "RNRetroFrontend.app"
-            BlueprintName = "RNRetroFrontend"
-            ReferencedContainer = "container:RNRetroFrontend.xcodeproj">
+            BuildableName = "Drawmark.app"
+            BlueprintName = "Drawmark"
+            ReferencedContainer = "container:Drawmark.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

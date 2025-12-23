@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 //
-// RNRetroFrontend - Ink Package
+// Drawmark - Ink Package
 // InkPackage.kt
 //
 // React Native package registration for InkCanvasViewManager and InkEditorViewManager.
 
-package com.rnretrofrontend.ink
+package app.drawmark.ink
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule

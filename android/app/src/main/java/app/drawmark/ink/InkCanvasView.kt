@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 //
-// RNRetroFrontend - Ink Canvas View
+// Drawmark - Ink Canvas View
 // InkCanvasView.kt
 //
 // A Jetpack Compose-based view for displaying ink strokes (read-only).
 // For editing capabilities, use InkEditorView instead.
 
-package com.rnretrofrontend.ink
+package app.drawmark.ink
 
 import android.annotation.SuppressLint
 import android.content.Context

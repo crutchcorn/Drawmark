@@ -8,6 +8,6 @@ plugins {
 }
 extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
 expoAutolinking.useExpoModules()
-rootProject.name = 'RNRetroFrontend'
+rootProject.name = 'Drawmark'
 include ':app'
 includeBuild('../node_modules/@react-native/gradle-plugin')

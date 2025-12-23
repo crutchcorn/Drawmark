@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 //
-// RNRetroFrontend - Ink Canvas View Manager
+// Drawmark - Ink Canvas View Manager
 // InkCanvasViewManager.kt
 //
 // React Native ViewManager for the InkCanvasView component (read-only display).
 // For editing capabilities, use InkEditorViewManager instead.
 
-package com.rnretrofrontend.ink
+package app.drawmark.ink
 
 import android.view.Choreographer
 import android.view.View

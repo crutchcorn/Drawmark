@@ -1,5 +1,5 @@
 {
-  "name": "RNRetroFrontend",
-  "displayName": "RNRetroFrontend",
+  "name": "Drawmark",
+  "displayName": "Drawmark",
   "plugins": ["expo-sqlite", "expo-asset"]
 }

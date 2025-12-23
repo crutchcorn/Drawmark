@@ -1,11 +1,11 @@
-package com.rnretrofrontend
+package app.drawmark
 
 import android.app.Application
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
 import com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative
-import com.rnretrofrontend.ink.InkPackage
+import app.drawmark.ink.InkPackage
 import android.content.res.Configuration
 import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ExpoReactHostFactory

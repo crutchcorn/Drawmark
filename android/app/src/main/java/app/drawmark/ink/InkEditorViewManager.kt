@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 //
-// RNRetroFrontend - Ink Editor View Manager
+// Drawmark - Ink Editor View Manager
 // InkEditorViewManager.kt
 //
 // React Native ViewManager for the InkEditorView component (supports editing).
 
-package com.rnretrofrontend.ink
+package app.drawmark.ink
 
 import android.graphics.Color
 import android.view.Choreographer

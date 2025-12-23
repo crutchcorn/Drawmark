@@ -78,9 +78,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.rnretrofrontend"
+    namespace "app.drawmark"
     defaultConfig {
-        applicationId "com.rnretrofrontend"
+        applicationId "app.drawmark"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

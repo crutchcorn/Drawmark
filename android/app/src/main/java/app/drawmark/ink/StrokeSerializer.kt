@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 //
-// RNRetroFrontend - Stroke Serializer
+// Drawmark - Stroke Serializer
 // StrokeSerializer.kt
 //
 // Serialization and deserialization utilities for Ink strokes.
 
-package com.rnretrofrontend.ink
+package app.drawmark.ink
 
 import androidx.ink.brush.Brush
 import androidx.ink.brush.BrushFamily
