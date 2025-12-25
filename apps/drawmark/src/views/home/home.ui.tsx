@@ -9,6 +9,7 @@ import { InkCanvas } from '../../components/InkCanvas';
 import { PenIcon } from '../../components/Icons/pen';
 import { MarkerIcon } from '../../components/Icons/marker';
 import { HighlighterIcon } from '../../components/Icons/highlighter';
+import { BrushButton } from './components/BrushButton/BrushButton';
 
 interface HomeUIProps {
   canvasRef: RefObject<InkEditorRef | null>;
@@ -52,44 +53,42 @@ export function HomeUI({
       ) : (
         <InkCanvas initialStrokes={initialStrokes} style={{ flex: 1 }} />
       )}
-      <Button title="Clear" onPress={handleClear} />
+      <Pressable onPress={handleClear}><Text>Clear</Text></Pressable>
       <View style={{ flexWrap: 'nowrap' }}>
+        <BrushButton />
         <Pressable
           onPress={() => setBrushInfo({ ...brushInfo, family: 'pen' })}
-          style={{height: 30, width: 30}}
+          style={{ height: 30, width: 30 }}
         >
           <PenIcon activeColor={brushInfo.color} />
           {brushInfo.family === 'pen' ? <Text>!</Text> : null}
         </Pressable>
         <Pressable
           onPress={() => setBrushInfo({ ...brushInfo, family: 'marker' })}
-          style={{height: 30, width: 30}}
+          style={{ height: 30, width: 30 }}
         >
           <MarkerIcon activeColor={brushInfo.color} />
           {brushInfo.family === 'marker' ? <Text>!</Text> : null}
         </Pressable>
         <Pressable
           onPress={() => setBrushInfo({ ...brushInfo, family: 'highlighter' })}
-          style={{height: 30, width: 30}}
+          style={{ height: 30, width: 30 }}
         >
           <HighlighterIcon activeColor={brushInfo.color} />
           {brushInfo.family === 'highlighter' ? <Text>!</Text> : null}
         </Pressable>
       </View>
       <View style={{ flexWrap: 'nowrap' }}>
-        <Button
-          title="Red"
+        <Pressable
           onPress={() => setBrushInfo({ ...brushInfo, color: '#FF0000' })}
-        />
-        <Button
-          title="Blue"
+        ><Text>Red</Text></Pressable>
+        <Pressable
           onPress={() => setBrushInfo({ ...brushInfo, color: '#0000FF' })}
-        />
+        ><Text>Blue</Text></Pressable>
       </View>
-      <Button
-        title={isEditing ? 'Stop Editing' : 'Edit'}
+      <Pressable
         onPress={handleEditToggle}
-      />
+      ><Text>{isEditing ? 'Stop Editing' : 'Edit'}</Text></Pressable>
     </View>
   );
 }

@@ -8,10 +8,11 @@ This project is using React Native with TypeScript. Please follow the instructio
 
 - Do not use emoji in the UI since it cheapens the user experience. Instead, use proper icons from `@react-native-vector-icons/ionicons` (RNVI Ionicons).
   - Docs for RNVI Ionicons: https://www.npmjs.com/package/@react-native-vector-icons/ionicons
-- Do not use inline styles. Use StyleSheet for all styling.
+- Do not use inline styles or StyleSheet for any styling. Instead, use `className` and Tailwind classnames. We have a transformer that converts Tailwind classnames to React Native styles.
 - Use TanStack Query for data fetching and state management.
 - Use Drizzle ORM for database interactions.
 - Use React Navigation for navigation.
+- Never use the built-in `Button` component
 
 ## Folder structure
 
