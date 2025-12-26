@@ -186,7 +186,7 @@ import kotlinx.coroutines.launch
  *   innerTextField exactly once.
  */
 @Composable
-internal fun CoreTextField(
+fun CoreTextField(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,

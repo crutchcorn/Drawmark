@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.ink.authoring.InProgressStrokeId
 import androidx.ink.authoring.InProgressStrokesView
@@ -18,6 +19,7 @@ import androidx.ink.brush.Brush
 import androidx.ink.rendering.android.canvas.CanvasStrokeRenderer
 import androidx.ink.strokes.Stroke
 import androidx.input.motionprediction.MotionEventPredictor
+import app.drawmark.android.lib.textcanvas.CoreTextField
 
 @SuppressLint("ClickableViewAccessibility")
 @Composable
@@ -34,6 +36,7 @@ fun InkEditorSurface(
     val currentGetBrush = rememberUpdatedState(getBrush)
 
     Box(modifier = Modifier.fillMaxSize()) {
+        CoreTextField(value = TextFieldValue(""), onValueChange = {})
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { context ->
