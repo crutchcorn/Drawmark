@@ -6,6 +6,7 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "lint": "nx eslint:lint",
+    "format": "prettier --write ./src",
     "start": "react-native start",
     "test": "nx jest:test",
     "gen:db": "npx drizzle-kit generate"
@@ -62,7 +63,7 @@
     "eslint": "~8.57.0",
     "jest": "^30.0.2",
     "postcss": "^8.5.6",
-    "prettier": "^2.8.8",
+    "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "react-test-renderer": "19.1.1",
     "tailwindcss": "^4.1.18",

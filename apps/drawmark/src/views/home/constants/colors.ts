@@ -9,4 +9,4 @@ export const Colors = {
   purple: '#B10DC9',
   pink: '#FF41B4',
   brown: '#85144B',
-}
+};

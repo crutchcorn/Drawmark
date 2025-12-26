@@ -9,7 +9,11 @@ export function HomeView() {
   const { canvasRef, initialStrokes, isLoading, handleStrokesChange } =
     useInkCanvasPersistence('main-canvas');
 
-  const [brushInfo, setBrushInfo] = useState({ color: Colors.blue, size: 8, family: 'pen' } as InkEditorBrushInfo);
+  const [brushInfo, setBrushInfo] = useState({
+    color: Colors.blue,
+    size: 8,
+    family: 'pen',
+  } as InkEditorBrushInfo);
 
   const [isEditing, setIsEditing] = useState(false);
 

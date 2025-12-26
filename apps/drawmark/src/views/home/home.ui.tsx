@@ -1,7 +1,8 @@
 import { RefObject } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import {
-  InkEditor, InkEditorBrushFamily,
+  InkEditor,
+  InkEditorBrushFamily,
   InkEditorBrushInfo,
   InkEditorRef,
 } from '../../components/InkEditor';
@@ -38,7 +39,8 @@ export function HomeUI({
     setIsEditing(!isEditing);
   };
 
-  const setFamily = (family: InkEditorBrushFamily) => setBrushInfo({ ...brushInfo, family });
+  const setFamily = (family: InkEditorBrushFamily) =>
+    setBrushInfo({ ...brushInfo, family });
 
   const setColor = (color: string) => setBrushInfo({ ...brushInfo, color });
 
@@ -57,15 +59,38 @@ export function HomeUI({
       ) : (
         <InkCanvas initialStrokes={initialStrokes} style={{ flex: 1 }} />
       )}
-      <Pressable onPress={handleClear}><Text>Clear</Text></Pressable>
+      <Pressable onPress={handleClear}>
+        <Text>Clear</Text>
+      </Pressable>
       <View className={`flex flex-row space-x-4`}>
-        <BrushButton Icon={PenIcon} family="pen" currentFamily={brushInfo.family} setFamily={setFamily} color={brushInfo.color} setColor={setColor} />
-        <BrushButton Icon={MarkerIcon} family="marker" currentFamily={brushInfo.family} setFamily={setFamily} color={brushInfo.color} setColor={setColor} />
-        <BrushButton Icon={HighlighterIcon} family="highlighter" currentFamily={brushInfo.family} setFamily={setFamily} color={brushInfo.color} setColor={setColor} />
+        <BrushButton
+          Icon={PenIcon}
+          family="pen"
+          currentFamily={brushInfo.family}
+          setFamily={setFamily}
+          color={brushInfo.color}
+          setColor={setColor}
+        />
+        <BrushButton
+          Icon={MarkerIcon}
+          family="marker"
+          currentFamily={brushInfo.family}
+          setFamily={setFamily}
+          color={brushInfo.color}
+          setColor={setColor}
+        />
+        <BrushButton
+          Icon={HighlighterIcon}
+          family="highlighter"
+          currentFamily={brushInfo.family}
+          setFamily={setFamily}
+          color={brushInfo.color}
+          setColor={setColor}
+        />
       </View>
-      <Pressable
-        onPress={handleEditToggle}
-      ><Text>{isEditing ? 'Stop Editing' : 'Edit'}</Text></Pressable>
+      <Pressable onPress={handleEditToggle}>
+        <Text>{isEditing ? 'Stop Editing' : 'Edit'}</Text>
+      </Pressable>
     </View>
   );
 }

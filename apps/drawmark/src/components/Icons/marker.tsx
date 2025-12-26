@@ -4,7 +4,7 @@ import { Svg } from '../Svg';
 
 export function MarkerIcon({ activeColor, ...props }: IconProps) {
   return (
-    <Svg  {...props} viewBox="0 0 480 480" fill="none">
+    <Svg {...props} viewBox="0 0 480 480" fill="none">
       <Path
         fill-rule="evenodd"
         clip-rule="evenodd"

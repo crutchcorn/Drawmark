@@ -8,7 +8,7 @@ import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import migrations from './drizzle/migrations';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PortalHost } from '@rn-primitives/portal';
-import "./global.css"
+import './global.css';
 
 const queryClient = new QueryClient();
 
