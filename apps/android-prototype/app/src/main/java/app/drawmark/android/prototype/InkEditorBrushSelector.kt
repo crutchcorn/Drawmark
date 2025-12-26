@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,7 +23,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 /**
  * Data class representing a brush option in the selector.
@@ -155,15 +158,51 @@ private fun PenShape(
 }
 
 /**
+ * A text mode button that displays "T" and indicates selection state.
+ */
+@Composable
+private fun TextModeButton(
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .size(56.dp)
+            .clip(CircleShape)
+            .background(
+                if (isSelected) Color.White.copy(alpha = 0.2f) else Color.Transparent
+            )
+            .border(
+                width = if (isSelected) 2.dp else 0.dp,
+                color = if (isSelected) Color.White else Color.Transparent,
+                shape = CircleShape
+            )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "T",
+            color = Color.White,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+/**
  * A horizontal brush selector bar with rounded pill shape.
  * Displays multiple brush options that can be selected.
  * Tapping on an already-selected brush opens a color picker popup.
+ * Includes a text mode button.
  */
 @Composable
 fun InkEditorBrushSelector(
     selectedBrushIndex: Int,
+    isTextMode: Boolean,
     onBrushSelected: (index: Int, option: BrushOption) -> Unit,
     onColorChanged: (index: Int, newColor: Color) -> Unit,
+    onTextModeSelected: () -> Unit,
     modifier: Modifier = Modifier,
     brushOptions: List<BrushOption> = defaultBrushOptions
 ) {
@@ -183,19 +222,25 @@ fun InkEditorBrushSelector(
             brushOptions.forEachIndexed { index, option ->
                 BrushItem(
                     option = option,
-                    isSelected = index == selectedBrushIndex,
+                    isSelected = index == selectedBrushIndex && !isTextMode,
                     onClick = {
-                        if (index == selectedBrushIndex) {
+                        if (index == selectedBrushIndex && !isTextMode) {
                             // Tapped on already-selected brush, show color picker
                             colorPickerBrushIndex.value = index
                             showColorPicker.value = true
                         } else {
-                            // Select this brush
+                            // Select this brush (also exits text mode)
                             onBrushSelected(index, option)
                         }
                     }
                 )
             }
+            
+            // Text mode button
+            TextModeButton(
+                isSelected = isTextMode,
+                onClick = onTextModeSelected
+            )
         }
 
         // Show color picker popup when triggered
