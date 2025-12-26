@@ -11,6 +11,7 @@ import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,6 +19,10 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventTimeoutCancellationException
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.ink.authoring.InProgressStrokeId
 import androidx.ink.authoring.InProgressStrokesView
@@ -26,6 +31,8 @@ import androidx.ink.rendering.android.canvas.CanvasStrokeRenderer
 import androidx.ink.strokes.Stroke
 import androidx.input.motionprediction.MotionEventPredictor
 import app.drawmark.android.lib.textcanvas.InkCanvasTextFieldManager
+import app.drawmark.android.lib.textcanvas.TextFieldContextMenu
+import kotlin.math.roundToInt
 
 /**
  * Editing mode for the InkEditor.
@@ -237,7 +244,9 @@ fun InkEditorSurface(
                                     }
                                 }
                             } catch (e: PointerEventTimeoutCancellationException) {
-                                // Single tap
+                                // Single tap - hide context menu first
+                                textFieldManager.textFields.forEach { it.showContextMenu = false }
+                                
                                 if (!textFieldManager.handleTap(downPosition)) {
                                     // No text field was tapped - create a new one
                                     val newTextField = textFieldManager.addTextField(downPosition, "")
@@ -247,6 +256,52 @@ fun InkEditorSurface(
                         }
                     }
             )
+            
+            // Context menu overlay for text fields
+            val clipboardManager = LocalClipboardManager.current
+            val density = LocalDensity.current
+            
+            textFieldManager.textFields.forEach { textFieldState ->
+                if (textFieldState.showContextMenu) {
+                    val menuX = textFieldState.position.x + textFieldState.contextMenuPosition.x
+                    val menuY = textFieldState.position.y + textFieldState.contextMenuPosition.y
+                    
+                    TextFieldContextMenu(
+                        hasSelection = textFieldState.hasSelection,
+                        hasClipboardContent = clipboardManager.getText() != null,
+                        onCut = {
+                            if (textFieldState.hasSelection) {
+                                clipboardManager.setText(AnnotatedString(textFieldState.selectedText))
+                                textFieldState.deleteSelection(allowMerge = false)
+                            }
+                        },
+                        onCopy = {
+                            if (textFieldState.hasSelection) {
+                                clipboardManager.setText(AnnotatedString(textFieldState.selectedText))
+                            }
+                        },
+                        onPaste = {
+                            clipboardManager.getText()?.let { text ->
+                                textFieldState.insertText(text.toString(), allowMerge = false)
+                            }
+                        },
+                        onSelectAll = {
+                            textFieldState.selectAll()
+                            // Reposition menu after select all
+                            textFieldManager.showContextMenuForTextField(textFieldState)
+                        },
+                        onDismiss = {
+                            textFieldState.showContextMenu = false
+                        },
+                        modifier = Modifier.offset {
+                            IntOffset(
+                                menuX.roundToInt(),
+                                menuY.roundToInt().coerceAtLeast(0)
+                            )
+                        }
+                    )
+                }
+            }
         }
     }
 }

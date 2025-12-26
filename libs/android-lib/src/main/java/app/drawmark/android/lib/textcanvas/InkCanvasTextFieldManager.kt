@@ -176,7 +176,7 @@ class InkCanvasTextFieldManager {
     /**
      * Handle a long press on the canvas.
      *
-     * This will start selection mode in the pressed text field.
+     * This will start selection mode in the pressed text field and show the context menu.
      *
      * @param position The press position in canvas coordinates
      * @return true if a text field was long-pressed
@@ -194,10 +194,50 @@ class InkCanvasTextFieldManager {
                     androidx.compose.ui.text.TextRange(wordBoundary.start, wordBoundary.end)
                 )
                 pressedTextField.handleState = HandleState.Selection
+                
+                // Show context menu above the selection
+                showContextMenuForTextField(pressedTextField)
             }
             return true
         }
         return false
+    }
+
+    /**
+     * Show the context menu for a text field.
+     * Positions the menu above the selection or cursor.
+     */
+    fun showContextMenuForTextField(textField: CanvasTextFieldState) {
+        val layoutResult = textField.textLayoutResult ?: return
+        
+        // Get the position for the context menu (above the selection/cursor)
+        // Use a larger offset to give breathing room above handles
+        val menuVerticalOffset = 98f
+        val menuPosition = if (textField.hasSelection) {
+            // Position above the start of the selection
+            val startRect = layoutResult.getCursorRect(textField.selection.min)
+            Offset(
+                x = (startRect.left + layoutResult.getCursorRect(textField.selection.max).left) / 2,
+                y = startRect.top - menuVerticalOffset
+            )
+        } else {
+            // Position above the cursor
+            val cursorRect = layoutResult.getCursorRect(textField.selection.start)
+            Offset(
+                x = cursorRect.left,
+                y = cursorRect.top - menuVerticalOffset
+            )
+        }
+        
+        textField.contextMenuPosition = menuPosition
+        textField.showContextMenu = true
+    }
+
+    /**
+     * Hide the context menu for a text field.
+     */
+    fun hideContextMenu(textField: CanvasTextFieldState) {
+        textField.showContextMenu = false
     }
 
     /**

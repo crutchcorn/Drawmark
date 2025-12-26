@@ -146,6 +146,19 @@ class CanvasTextFieldState(
     var showCursorHandle by mutableStateOf(false)
         internal set
 
+    // ============ Context Menu State ============
+
+    /**
+     * Whether the context menu (Cut/Copy/Paste) should be shown.
+     */
+    var showContextMenu by mutableStateOf(false)
+
+    /**
+     * Position of the context menu in local coordinates.
+     * This is typically positioned above the selection or cursor.
+     */
+    var contextMenuPosition by mutableStateOf(Offset.Zero)
+
     // ============ IME Composition State ============
 
     /**
