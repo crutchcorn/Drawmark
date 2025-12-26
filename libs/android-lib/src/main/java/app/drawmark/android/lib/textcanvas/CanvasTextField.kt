@@ -290,9 +290,19 @@ fun CanvasTextField(
                 true
             }
 
-            // Undo (Ctrl+Z) - TODO: Implement undo manager
-            isCtrl && keyEvent.key == Key.Z -> {
-                // TODO: Implement undo
+            // Undo (Ctrl+Z)
+            isCtrl && !isShift && keyEvent.key == Key.Z -> {
+                if (state.undo()) {
+                    currentOnValueChange(state.value)
+                }
+                true
+            }
+
+            // Redo (Ctrl+Shift+Z or Ctrl+Y)
+            (isCtrl && isShift && keyEvent.key == Key.Z) || (isCtrl && keyEvent.key == Key.Y) -> {
+                if (state.redo()) {
+                    currentOnValueChange(state.value)
+                }
                 true
             }
 

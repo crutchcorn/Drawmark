@@ -34,6 +34,16 @@ class CanvasTextFieldState(
         internal set
 
     /**
+     * Undo manager for tracking text changes.
+     */
+    val undoManager = UndoManager()
+
+    init {
+        // Initialize undo manager with the initial value
+        undoManager.initialize(initialValue)
+    }
+
+    /**
      * The text content as a simple string.
      */
     val text: String get() = value.text
@@ -226,6 +236,7 @@ class CanvasTextFieldState(
      * Insert text at the current cursor position, replacing any selection.
      */
     fun insertText(textToInsert: String) {
+        undoManager.recordChange(value)
         val beforeSelection = value.text.substring(0, value.selection.min)
         val afterSelection = value.text.substring(value.selection.max)
         val newText = beforeSelection + textToInsert + afterSelection
@@ -245,6 +256,7 @@ class CanvasTextFieldState(
             deleteSelection()
             true
         } else if (value.selection.start > 0) {
+            undoManager.recordChange(value)
             val beforeCursor = value.text.substring(0, value.selection.start - 1)
             val afterCursor = value.text.substring(value.selection.start)
             value = TextFieldValue(
@@ -266,6 +278,7 @@ class CanvasTextFieldState(
             deleteSelection()
             true
         } else if (value.selection.start < value.text.length) {
+            undoManager.recordChange(value)
             val beforeCursor = value.text.substring(0, value.selection.start)
             val afterCursor = value.text.substring(value.selection.start + 1)
             value = TextFieldValue(
@@ -283,12 +296,43 @@ class CanvasTextFieldState(
      */
     fun deleteSelection() {
         if (hasSelection) {
+            undoManager.recordChange(value)
             val beforeSelection = value.text.substring(0, value.selection.min)
             val afterSelection = value.text.substring(value.selection.max)
             value = TextFieldValue(
                 text = beforeSelection + afterSelection,
                 selection = TextRange(beforeSelection.length)
             )
+        }
+    }
+
+    // ============ Undo/Redo ============
+
+    /**
+     * Undo the last text change.
+     * @return true if undo was performed, false if nothing to undo
+     */
+    fun undo(): Boolean {
+        val previousValue = undoManager.undo(value)
+        return if (previousValue != null) {
+            value = previousValue
+            true
+        } else {
+            false
+        }
+    }
+
+    /**
+     * Redo the last undone change.
+     * @return true if redo was performed, false if nothing to redo
+     */
+    fun redo(): Boolean {
+        val nextValue = undoManager.redo(value)
+        return if (nextValue != null) {
+            value = nextValue
+            true
+        } else {
+            false
         }
     }
 

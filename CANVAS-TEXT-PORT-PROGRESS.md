@@ -392,15 +392,14 @@ fun InkCanvasWithTextFields(
 
 ### Current Limitations
 1. **Single-line focus**: Uses deprecated `TextInputService` API (will need migration to `PlatformTextInputModifierNode`)
-2. **Undo/Redo**: Not yet implemented (TODO: add UndoManager integration)
-3. **Multi-line scrolling**: No internal scrolling for multi-line text overflow
-4. **Selection handles**: Visual drag handles not yet implemented (just the selection highlight)
-5. **Context menu**: Long-press context menu with Cut/Copy/Paste not implemented
+2. **Multi-line scrolling**: No internal scrolling for multi-line text overflow
+3. **Selection handles**: Visual drag handles not yet implemented (just the selection highlight)
+4. **Context menu**: Long-press context menu with Cut/Copy/Paste not implemented
 
 ### Planned Improvements
 - [ ] Migrate from `TextInputService` to `PlatformTextInputModifierNode`
 - [x] Implement word-by-word navigation (Ctrl+Arrow)
-- [ ] Add UndoManager for Ctrl+Z/Y support
+- [x] Add UndoManager for Ctrl+Z/Y support
 - [ ] Implement visual selection handles
 - [ ] Add drag-to-select gesture
 - [ ] Implement context menu on long-press
