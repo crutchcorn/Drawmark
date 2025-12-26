@@ -360,6 +360,96 @@ class CanvasTextFieldState(
         }
     }
 
+    /**
+     * Move cursor left by one word.
+     * @param extendSelection If true, extend selection instead of moving cursor
+     */
+    fun moveCursorLeftByWord(extendSelection: Boolean = false) {
+        val text = value.text
+        val currentPos = if (extendSelection) value.selection.end else value.selection.start
+        val newPos = findPreviousWordBoundary(text, currentPos)
+        
+        if (extendSelection) {
+            value = value.copy(selection = TextRange(value.selection.start, newPos))
+        } else {
+            if (hasSelection) {
+                // Collapse to start of selection, then move by word
+                val collapsedPos = value.selection.min
+                val wordPos = findPreviousWordBoundary(text, collapsedPos)
+                value = value.copy(selection = TextRange(wordPos))
+            } else {
+                value = value.copy(selection = TextRange(newPos))
+            }
+        }
+    }
+
+    /**
+     * Move cursor right by one word.
+     * @param extendSelection If true, extend selection instead of moving cursor
+     */
+    fun moveCursorRightByWord(extendSelection: Boolean = false) {
+        val text = value.text
+        val currentPos = if (extendSelection) value.selection.end else value.selection.end
+        val newPos = findNextWordBoundary(text, currentPos)
+        
+        if (extendSelection) {
+            value = value.copy(selection = TextRange(value.selection.start, newPos))
+        } else {
+            if (hasSelection) {
+                // Collapse to end of selection, then move by word
+                val collapsedPos = value.selection.max
+                val wordPos = findNextWordBoundary(text, collapsedPos)
+                value = value.copy(selection = TextRange(wordPos))
+            } else {
+                value = value.copy(selection = TextRange(newPos))
+            }
+        }
+    }
+
+    /**
+     * Find the previous word boundary from the given position.
+     * A word boundary is defined as a transition between word and non-word characters.
+     */
+    private fun findPreviousWordBoundary(text: String, position: Int): Int {
+        if (position <= 0) return 0
+        
+        var pos = position - 1
+        
+        // Skip any whitespace/punctuation before the current position
+        while (pos > 0 && !text[pos].isLetterOrDigit()) {
+            pos--
+        }
+        
+        // Now skip the word characters to find the start of the word
+        while (pos > 0 && text[pos - 1].isLetterOrDigit()) {
+            pos--
+        }
+        
+        return pos
+    }
+
+    /**
+     * Find the next word boundary from the given position.
+     * A word boundary is defined as a transition between word and non-word characters.
+     */
+    private fun findNextWordBoundary(text: String, position: Int): Int {
+        if (position >= text.length) return text.length
+        
+        var pos = position
+        
+        // If we're in a word, skip to the end of it
+        while (pos < text.length && text[pos].isLetterOrDigit()) {
+            pos++
+        }
+        
+        // Skip any whitespace/punctuation after the word
+        while (pos < text.length && !text[pos].isLetterOrDigit()) {
+            pos++
+        }
+        
+        return pos
+    }
+
     // ============ Hit Testing ============
 
     /**

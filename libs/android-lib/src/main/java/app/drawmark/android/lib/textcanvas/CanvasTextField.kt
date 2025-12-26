@@ -299,8 +299,7 @@ fun CanvasTextField(
             // Arrow Left
             keyEvent.key == Key.DirectionLeft -> {
                 if (isCtrl) {
-                    // Move by word - TODO: Implement word navigation
-                    state.moveCursorLeft(extendSelection = isShift)
+                    state.moveCursorLeftByWord(extendSelection = isShift)
                 } else {
                     state.moveCursorLeft(extendSelection = isShift)
                 }
@@ -310,8 +309,7 @@ fun CanvasTextField(
             // Arrow Right
             keyEvent.key == Key.DirectionRight -> {
                 if (isCtrl) {
-                    // Move by word - TODO: Implement word navigation
-                    state.moveCursorRight(extendSelection = isShift)
+                    state.moveCursorRightByWord(extendSelection = isShift)
                 } else {
                     state.moveCursorRight(extendSelection = isShift)
                 }
