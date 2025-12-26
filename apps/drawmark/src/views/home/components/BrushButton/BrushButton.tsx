@@ -7,6 +7,7 @@ import { useRef } from 'react';
 import { Colors } from '../../constants/colors';
 import { VariableContextProvider } from "nativewind";
 import Color from "color";
+import { splitInto } from '../../../../utils/split-into';
 
 const ColorValues = Object.values(Colors);
 
@@ -19,18 +20,24 @@ function BrushColorButton({
   currentColor,
   setColor
 }: BrushColorButtonProps) {
-  return <View className="bg-white p-12">
-    {ColorValues.map((color) => {
-        const isColorDark = new Color(color).isDark();
-        return <VariableContextProvider key={color} value={{
-          "--background": color
-        }}>
-        <Pressable onPress={() => setColor(color)} className={`relative w-12 h-12 rounded-full bg-(--background) flex items-center justify-center`}>
-          {currentColor === color ? <View className={`w-4 h-4 rounded-full ${isColorDark ? "bg-white" : "bg-black"}`}/> : null}
-        </Pressable>
-        </VariableContextProvider>;
-      }
-    )}
+  const ColorValuesRows = splitInto(ColorValues, 4);
+
+  return <View className="bg-white p-12 flex flex-col space-y-4 rounded-lg shadow-lg">
+    {ColorValuesRows.map((row, i) => (
+      <View key={i} className="flex flex-row space-x-4">
+        {row.map((color) => {
+            const isColorDark = new Color(color).isDark();
+            return (
+              <VariableContextProvider key={color} value={{
+                "--background": color
+              }}>
+                <Pressable onPress={() => setColor(color)} className={`relative w-12 h-12 rounded-full bg-(--background) flex items-center justify-center`}>
+                  {currentColor === color ? <View className={`w-4 h-4 rounded-full ${isColorDark ? "bg-white" : "bg-black"}`}/> : null}
+                </Pressable>
+              </VariableContextProvider>
+            )})}
+      </View>
+    ))}
   </View>
 }
 
