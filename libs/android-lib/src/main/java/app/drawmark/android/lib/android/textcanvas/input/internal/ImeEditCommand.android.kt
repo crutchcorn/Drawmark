@@ -17,7 +17,6 @@
 package app.drawmark.android.lib.textcanvas.input.internal
 
 import androidx.annotation.VisibleForTesting
-import androidx.compose.foundation.internal.requirePrecondition
 import app.drawmark.android.lib.textcanvas.input.PlacedAnnotation
 import app.drawmark.android.lib.textcanvas.input.TextFieldBuffer
 import app.drawmark.android.lib.textcanvas.input.TextFieldState
@@ -264,10 +263,6 @@ internal fun ImeEditCommandScope.deleteSurroundingText(
     lengthAfterCursor: Int,
 ) {
     edit {
-        requirePrecondition(lengthBeforeCursor >= 0 && lengthAfterCursor >= 0) {
-            "Expected lengthBeforeCursor and lengthAfterCursor to be non-negative, were " +
-                "$lengthBeforeCursor and $lengthAfterCursor respectively."
-        }
 
         // All IME edit commands are generated in the transformed space because that's all the IME
         // knows. Therefore the [lengthBeforeCursor] and [lengthAfterCursor] values are actually
@@ -310,10 +305,6 @@ internal fun ImeEditCommandScope.deleteSurroundingTextInCodePoints(
     lengthBeforeCursor: Int,
     lengthAfterCursor: Int,
 ) = edit {
-    requirePrecondition(lengthBeforeCursor >= 0 && lengthAfterCursor >= 0) {
-        "Expected lengthBeforeCursor and lengthAfterCursor to be non-negative, were " +
-            "$lengthBeforeCursor and $lengthAfterCursor respectively."
-    }
 
     // Convert code point length into character length. Then call the common logic of the
     // DeleteSurroundingTextEditOp

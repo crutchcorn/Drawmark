@@ -16,7 +16,6 @@
 
 package app.drawmark.android.lib.textcanvas.modifiers
 
-import androidx.compose.foundation.internal.requirePreconditionNotNull
 import app.drawmark.android.lib.textcanvas.DefaultMinLines
 import app.drawmark.android.lib.textcanvas.TextAutoSize
 import androidx.compose.ui.geometry.Rect
@@ -84,12 +83,6 @@ internal class SelectableTextAnnotatedStringNode(
                 onShowTranslation = onShowTranslation,
             )
         )
-
-    init {
-        requirePreconditionNotNull(selectionController) {
-            "Do not use SelectionCapableStaticTextModifier unless selectionController != null"
-        }
-    }
 
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
         selectionController?.updateGlobalPosition(coordinates)

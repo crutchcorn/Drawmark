@@ -16,7 +16,6 @@
 
 package app.drawmark.android.lib.textcanvas.contextmenu.modifier
 
-import androidx.compose.foundation.internal.checkPrecondition
 import app.drawmark.android.lib.textcanvas.contextmenu.data.TextContextMenuData
 import app.drawmark.android.lib.textcanvas.contextmenu.provider.LocalTextContextMenuToolbarProvider
 import app.drawmark.android.lib.textcanvas.contextmenu.provider.TextContextMenuDataProvider
@@ -37,8 +36,6 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-private const val ToolbarRequesterNotInitialized = "ToolbarRequester is not initialized."
-
 /**
  * Use in conjunction with
  * [Modifier.textContextMenuToolbarHandler(...)][textContextMenuToolbarHandler] to request the
@@ -49,9 +46,6 @@ internal abstract class ToolbarRequester {
     internal var toolbarHandlerState: ToolbarHandlerState = ToolbarHandlerState.Uninitialized
 
     internal fun requireInitialized(): TextContextMenuToolbarHandlerNode? {
-        checkPrecondition(toolbarHandlerState != ToolbarHandlerState.Uninitialized) {
-            ToolbarRequesterNotInitialized
-        }
         return toolbarHandlerNode
     }
 

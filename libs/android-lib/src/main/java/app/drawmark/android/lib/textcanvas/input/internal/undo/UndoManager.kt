@@ -16,8 +16,6 @@
 
 package app.drawmark.android.lib.textcanvas.input.internal.undo
 
-import androidx.compose.foundation.internal.checkPrecondition
-import androidx.compose.foundation.internal.requirePrecondition
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -38,13 +36,6 @@ internal class UndoManager<T>(
     initialRedoStack: List<T> = emptyList(),
     private val capacity: Int = 100,
 ) {
-    init {
-        requirePrecondition(capacity >= 0) { "Capacity must be a positive integer" }
-        requirePrecondition(initialRedoStack.size + initialUndoStack.size <= capacity) {
-            "Initial list of undo and redo operations have a size greater than the given capacity."
-        }
-    }
-
     private var undoStack = SnapshotStateList<T>().apply { addAll(initialUndoStack) }
     private var redoStack = SnapshotStateList<T>().apply { addAll(initialRedoStack) }
 
@@ -74,11 +65,6 @@ internal class UndoManager<T>(
      * returns, the given item has already been carried to the redo stack.
      */
     fun undo(): T {
-        checkPrecondition(canUndo) {
-            "It's an error to call undo while there is nothing to undo. " +
-                "Please first check `canUndo` value before calling the `undo` function."
-        }
-
         val topOperation = undoStack.removeLastKt()
 
         redoStack.add(topOperation)
@@ -92,11 +78,6 @@ internal class UndoManager<T>(
      * returns, the given item has already been carried back to the undo stack.
      */
     fun redo(): T {
-        checkPrecondition(canRedo) {
-            "It's an error to call redo while there is nothing to redo. " +
-                "Please first check `canRedo` value before calling the `redo` function."
-        }
-
         val topOperation = redoStack.removeLastKt()
 
         undoStack.add(topOperation)

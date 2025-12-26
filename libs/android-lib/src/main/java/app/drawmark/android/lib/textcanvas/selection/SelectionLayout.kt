@@ -23,7 +23,6 @@ import androidx.collection.MutableLongObjectMap
 import androidx.collection.longObjectMapOf
 import androidx.collection.mutableLongIntMapOf
 import androidx.collection.mutableLongObjectMapOf
-import androidx.compose.foundation.internal.checkPrecondition
 import app.drawmark.android.lib.textcanvas.selection.Direction.AFTER
 import app.drawmark.android.lib.textcanvas.selection.Direction.BEFORE
 import app.drawmark.android.lib.textcanvas.selection.Direction.ON
@@ -143,12 +142,6 @@ private class MultiSelectionLayout(
     override val isStartHandle: Boolean,
     override val previousSelection: Selection?,
 ) : SelectionLayout {
-    init {
-        checkPrecondition(infoList.size > 1) {
-            "MultiSelectionLayout requires an infoList size greater than 1, was ${infoList.size}."
-        }
-    }
-
     // Most of these properties are unused unless shouldRecomputeSelection returns true,
     // hence why getters are used everywhere.
 
@@ -219,14 +212,6 @@ private class MultiSelectionLayout(
     override fun createSubSelections(selection: Selection): LongObjectMap<Selection> =
         // Selection is within one selectable, we can return a singleton map of this selection.
         if (selection.start.selectableId == selection.end.selectableId) {
-            // this check, if not passed, leads to exceptions when selection
-            // highlighting is rendered, so check here instead.
-            checkPrecondition(
-                (selection.handlesCrossed && selection.start.offset >= selection.end.offset) ||
-                    (!selection.handlesCrossed && selection.start.offset <= selection.end.offset)
-            ) {
-                "unexpectedly miss-crossed selection: $selection"
-            }
             longObjectMapOf(selection.start.selectableId, selection)
         } else
             mutableLongObjectMapOf<Selection>().apply {
@@ -258,12 +243,6 @@ private class MultiSelectionLayout(
             } else {
                 info.makeSingleLayoutSelection(start = minOffset, end = maxOffset)
             }
-
-        // this check, if not passed, leads to exceptions when selection
-        // highlighting is rendered, so check here instead.
-        checkPrecondition(minOffset <= maxOffset) {
-            "minOffset should be less than or equal to maxOffset: $subSelection"
-        }
 
         put(info.selectableId, subSelection)
     }

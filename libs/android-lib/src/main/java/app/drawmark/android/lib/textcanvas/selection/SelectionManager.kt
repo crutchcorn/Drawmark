@@ -29,8 +29,6 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitAllPointersUpWithSlopDetection
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitPrimaryFirstDown
-import androidx.compose.foundation.internal.requirePrecondition
-import androidx.compose.foundation.internal.requirePreconditionNotNull
 import app.drawmark.android.lib.textcanvas.Handle
 import app.drawmark.android.lib.textcanvas.TextContextMenuItems
 import app.drawmark.android.lib.textcanvas.TextContextMenuItems.*
@@ -547,9 +545,7 @@ internal class SelectionManager(private val selectionRegistrar: SelectionRegistr
     /** Returns non-nullable [containerLayoutCoordinates]. */
     internal fun requireContainerCoordinates(): LayoutCoordinates {
         val coordinates = containerLayoutCoordinates
-        requirePreconditionNotNull(coordinates) { "null coordinates" }
-        requirePrecondition(coordinates.isAttached) { "unattached coordinates" }
-        return coordinates
+        return coordinates!!
     }
 
     internal fun selectAllInSelectable(

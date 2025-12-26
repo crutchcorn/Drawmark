@@ -16,7 +16,6 @@
 
 package app.drawmark.android.lib.textcanvas.input.internal
 
-import androidx.compose.foundation.internal.requirePrecondition
 
 /**
  * The gap buffer implementation
@@ -228,10 +227,6 @@ internal class PartialGapBuffer(text: CharSequence) : CharSequence {
         textStart: Int = 0,
         textEnd: Int = text.length,
     ) {
-        requirePrecondition(start <= end) { "start=$start > end=$end" }
-        requirePrecondition(textStart <= textEnd) { "textStart=$textStart > textEnd=$textEnd" }
-        requirePrecondition(start >= 0) { "start must be non-negative, but was $start" }
-        requirePrecondition(textStart >= 0) { "textStart must be non-negative, but was $textStart" }
 
         val buffer = buffer
         val textLength = textEnd - textStart

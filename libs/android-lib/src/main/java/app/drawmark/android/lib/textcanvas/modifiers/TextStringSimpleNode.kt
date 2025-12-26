@@ -16,7 +16,6 @@
 
 package app.drawmark.android.lib.textcanvas.modifiers
 
-import androidx.compose.foundation.internal.requirePreconditionNotNull
 import app.drawmark.android.lib.textcanvas.DefaultMinLines
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -420,9 +419,7 @@ internal class TextStringSimpleNode(
 
         val layoutCache = getLayoutCache()
         val localParagraph =
-            requirePreconditionNotNull(layoutCache.paragraph) {
-                "Internal Error: ParagraphLayoutCache could not provide a Paragraph during the draw phase. Please report this bug on the official Issue Tracker with the following diagnostic information: (layoutCache=$_layoutCache, textSubstitution=$textSubstitution)"
-            }
+            layoutCache.paragraph!!
 
         drawIntoCanvas { canvas ->
             val willClip = layoutCache.didOverflow

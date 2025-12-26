@@ -18,7 +18,6 @@
 
 package app.drawmark.android.lib.textcanvas.input.internal
 
-import androidx.compose.foundation.internal.checkPrecondition
 import app.drawmark.android.lib.textcanvas.LegacyTextFieldState
 import app.drawmark.android.lib.textcanvas.selection.TextFieldSelectionManager
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -45,16 +44,10 @@ internal abstract class LegacyPlatformTextInputServiceAdapter : PlatformTextInpu
         private set
 
     fun registerModifier(node: LegacyPlatformTextInputNode) {
-        checkPrecondition(textInputModifierNode == null) {
-            "Expected textInputModifierNode to be null"
-        }
         textInputModifierNode = node
     }
 
     fun unregisterModifier(node: LegacyPlatformTextInputNode) {
-        checkPrecondition(textInputModifierNode === node) {
-            "Expected textInputModifierNode to be $node but was $textInputModifierNode"
-        }
         textInputModifierNode = null
     }
 

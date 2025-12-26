@@ -17,7 +17,6 @@
 package app.drawmark.android.lib.textcanvas.input
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.internal.requirePrecondition
 import app.drawmark.android.lib.textcanvas.KeyboardOptions
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
@@ -228,10 +227,6 @@ private data class AllCapsTransformation(private val locale: Locale) : InputTran
 
 // This is a very naive implementation for now, not intended to be production-ready.
 private data class MaxLengthFilter(private val maxLength: Int) : InputTransformation {
-
-    init {
-        requirePrecondition(maxLength >= 0) { "maxLength must be at least zero" }
-    }
 
     override fun SemanticsPropertyReceiver.applySemantics() {
         maxTextLength = maxLength

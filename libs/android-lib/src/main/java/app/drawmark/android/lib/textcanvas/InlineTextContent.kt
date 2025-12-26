@@ -16,7 +16,6 @@
 
 package app.drawmark.android.lib.textcanvas
 
-import androidx.compose.foundation.internal.requirePrecondition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.AnnotatedString
@@ -49,7 +48,6 @@ fun AnnotatedString.Builder.appendInlineContent(
     id: String,
     alternateText: String = REPLACEMENT_CHAR,
 ) {
-    requirePrecondition(alternateText.isNotEmpty()) { "alternateText can't be an empty string." }
     pushStringAnnotation(INLINE_CONTENT_TAG, id)
     append(alternateText)
     pop()

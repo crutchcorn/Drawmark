@@ -16,10 +16,7 @@
 
 package app.drawmark.android.lib.textcanvas.input
 
-import androidx.compose.foundation.internal.requirePrecondition
 import androidx.compose.foundation.layout.heightIn
-import app.drawmark.android.lib.textcanvas.input.TextFieldLineLimits.MultiLine
-import app.drawmark.android.lib.textcanvas.input.TextFieldLineLimits.SingleLine
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 
@@ -57,12 +54,6 @@ sealed interface TextFieldLineLimits {
     @Immutable
     class MultiLine(val minHeightInLines: Int = 1, val maxHeightInLines: Int = Int.MAX_VALUE) :
         TextFieldLineLimits {
-        init {
-            requirePrecondition(minHeightInLines in 1..maxHeightInLines) {
-                "Expected 1 ≤ minHeightInLines ≤ maxHeightInLines, were " +
-                    "$minHeightInLines, $maxHeightInLines"
-            }
-        }
 
         override fun toString(): String =
             "MultiLine(minHeightInLines=$minHeightInLines, maxHeightInLines=$maxHeightInLines)"

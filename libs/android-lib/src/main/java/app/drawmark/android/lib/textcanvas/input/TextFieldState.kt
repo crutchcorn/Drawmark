@@ -20,7 +20,6 @@ package app.drawmark.android.lib.textcanvas.input
 
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.internal.checkPrecondition
 import app.drawmark.android.lib.textcanvas.input.internal.undo.TextFieldEditUndoBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -194,9 +193,6 @@ internal constructor(
     @PublishedApi
     internal fun startEdit(): TextFieldBuffer {
         val isEditingFreeze = Snapshot.withoutReadObservation { isEditing }
-        checkPrecondition(!isEditingFreeze) {
-            "TextFieldState does not support concurrent or nested editing."
-        }
         isEditing = true
         return TextFieldBuffer(value)
     }

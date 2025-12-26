@@ -17,8 +17,6 @@
 package app.drawmark.android.lib.textcanvas.input
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.internal.checkPrecondition
-import androidx.compose.foundation.internal.requirePrecondition
 import app.drawmark.android.lib.textcanvas.input.TextFieldBuffer.ChangeList
 import app.drawmark.android.lib.textcanvas.input.internal.ChangeTracker
 import app.drawmark.android.lib.textcanvas.input.internal.OffsetMappingCalculator
@@ -305,10 +303,6 @@ internal constructor(
         textStart: Int = 0,
         textEnd: Int = text.length,
     ) {
-        requirePrecondition(start <= end) { "Expected start=$start <= end=$end" }
-        requirePrecondition(textStart <= textEnd) {
-            "Expected textStart=$textStart <= textEnd=$textEnd"
-        }
         onTextWillChange(start, end, textEnd - textStart)
         buffer.replace(start, end, text, textStart, textEnd)
 
@@ -466,12 +460,10 @@ internal constructor(
         val start = if (startExclusive) 0 else -1
         val end = if (endExclusive) length else length + 1
 
-        requirePrecondition(index in start until end) { "Expected $index to be in [$start, $end)" }
     }
 
     private fun requireValidRange(range: TextRange) {
         val validRange = TextRange(0, length)
-        requirePrecondition(range in validRange) { "Expected $range to be in $validRange" }
     }
 
     // TODO(135556699): Remove this when [TextFieldBuffer.addStyle] is supported by all
@@ -482,9 +474,6 @@ internal constructor(
     internal var outputTransformationAnnotations: MutableList<PlacedAnnotation>? = null
 
     internal fun addAnnotation(annotation: AnnotatedString.Annotation, start: Int, end: Int) {
-        checkPrecondition(canCallAddStyle) {
-            "You can add styling to a [TextFieldBuffer] only from an [OutputTransformation]."
-        }
         if (outputTransformationAnnotations == null) {
             outputTransformationAnnotations = mutableListOf()
         }

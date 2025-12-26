@@ -16,7 +16,6 @@
 
 package app.drawmark.android.lib.textcanvas.input.internal
 
-import androidx.compose.foundation.internal.requirePrecondition
 import androidx.compose.ui.text.TextRange
 
 /**
@@ -263,7 +262,6 @@ internal class OffsetMappingCalculator {
      * [sourceEnd] (exclusive) in the original text with some text with length [newLength].
      */
     fun recordEditOperation(sourceStart: Int, sourceEnd: Int, newLength: Int) {
-        requirePrecondition(newLength >= 0) { "Expected newLen to be ≥ 0, was $newLength" }
         val sourceMin = minOf(sourceStart, sourceEnd)
         val sourceMax = maxOf(sourceMin, sourceEnd)
         val sourceLength = sourceMax - sourceMin
