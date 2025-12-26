@@ -213,6 +213,14 @@ fun CanvasTextField(
                 }
                 inputSession = null
                 state.handleState = HandleState.None
+                
+                // Clear selection when losing focus (collapse to cursor at end of selection)
+                if (state.hasSelection) {
+                    state.clearSelection()
+                }
+                
+                // Clear undo/redo history when losing focus
+                state.undoManager.clear()
             }
         }
         .focusable(enabled = enabled)
