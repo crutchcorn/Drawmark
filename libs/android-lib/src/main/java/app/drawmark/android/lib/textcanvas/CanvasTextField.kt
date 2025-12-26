@@ -3,7 +3,10 @@ package app.drawmark.android.lib.textcanvas
 import android.graphics.Matrix
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -393,7 +396,82 @@ fun CanvasTextField(
         }
     }
 
-    // Touch input handling
+    // Handle dragging gesture modifier
+    val handleDragModifier = Modifier.pointerInput(enabled, state, textLayoutResult) {
+        if (!enabled) return@pointerInput
+        val layoutResult = textLayoutResult ?: return@pointerInput
+
+        awaitEachGesture {
+            val down = awaitFirstDown(requireUnconsumed = false)
+            val downPos = down.position
+
+            // Check if we hit a handle
+            var hitHandle: DraggingHandle? = null
+            
+            if (state.hasFocus && state.handleState != HandleState.None) {
+                when (state.handleState) {
+                    HandleState.Selection -> {
+                        if (state.hasSelection) {
+                            val startRect = CanvasTextDelegate.getStartHandleRect(
+                                layoutResult, state.selection.min
+                            )
+                            val endRect = CanvasTextDelegate.getEndHandleRect(
+                                layoutResult, state.selection.max
+                            )
+                            
+                            // Expand hit areas for easier touch
+                            val touchSlop = 16f
+                            val expandedStartRect = startRect.inflate(touchSlop)
+                            val expandedEndRect = endRect.inflate(touchSlop)
+                            
+                            when {
+                                expandedStartRect.contains(downPos) -> {
+                                    hitHandle = DraggingHandle.Start
+                                }
+                                expandedEndRect.contains(downPos) -> {
+                                    hitHandle = DraggingHandle.End
+                                }
+                            }
+                        }
+                    }
+                    HandleState.Cursor -> {
+                        val cursorRect = CanvasTextDelegate.getCursorHandleRect(
+                            layoutResult, state.selection.start
+                        )
+                        val touchSlop = 16f
+                        val expandedRect = cursorRect.inflate(touchSlop)
+                        
+                        if (expandedRect.contains(downPos)) {
+                            hitHandle = DraggingHandle.Cursor
+                        }
+                    }
+                    HandleState.None -> { /* No handles to drag */ }
+                }
+            }
+
+            if (hitHandle != null) {
+                down.consume()
+                state.startDraggingHandle(hitHandle)
+                
+                drag(down.id) { change ->
+                    change.consume()
+                    val offset = layoutResult.getOffsetForPosition(change.position)
+                    
+                    when (state.draggingHandle) {
+                        DraggingHandle.Start -> state.updateSelectionStart(offset)
+                        DraggingHandle.End -> state.updateSelectionEnd(offset)
+                        DraggingHandle.Cursor -> state.placeCursor(offset)
+                        null -> { /* Not dragging */ }
+                    }
+                    currentOnValueChange(state.value)
+                }
+                
+                state.stopDraggingHandle()
+            }
+        }
+    }
+
+    // Touch input handling for taps (separate from drag handling)
     val pointerModifier = Modifier.pointerInput(enabled, state, textLayoutResult) {
         if (!enabled) return@pointerInput
 
@@ -436,15 +514,19 @@ fun CanvasTextField(
     val layoutSize = state.layoutSize
     val minWidth = 100.dp
     val minHeight = 24.dp
+    
+    // Calculate extra height needed for handles
+    val handleHeight = CanvasTextDelegate.HANDLE_RADIUS * 2 + CanvasTextDelegate.HANDLE_STEM_HEIGHT
 
     Box(
         modifier = modifier
             .size(
                 width = with(density) { layoutSize.width.coerceAtLeast(minWidth.toPx()).toDp() },
-                height = with(density) { layoutSize.height.coerceAtLeast(minHeight.toPx()).toDp() }
+                height = with(density) { (layoutSize.height + handleHeight).coerceAtLeast(minHeight.toPx()).toDp() }
             )
             .then(focusModifier)
             .then(keyboardModifier)
+            .then(handleDragModifier)
             .then(pointerModifier)
     ) {
         Canvas(modifier = Modifier.matchParentSize()) {

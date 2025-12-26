@@ -206,6 +206,16 @@ class CanvasTextDelegate(
         const val SELECTION_ALPHA = 0.4f
 
         /**
+         * Default handle radius in pixels.
+         */
+        const val HANDLE_RADIUS = 12f
+
+        /**
+         * Default handle stem height in pixels.
+         */
+        const val HANDLE_STEM_HEIGHT = 8f
+
+        /**
          * Draw a text field onto an Android Canvas.
          *
          * @param canvas The native Android canvas to draw on
@@ -214,7 +224,9 @@ class CanvasTextDelegate(
          * @param position The position to draw at (top-left corner)
          * @param cursorColor The color for the cursor
          * @param selectionColor The color for selection highlight
+         * @param handleColor The color for selection/cursor handles
          * @param showCursor Whether to draw the cursor
+         * @param showHandles Whether to draw selection/cursor handles
          */
         fun draw(
             canvas: Canvas,
@@ -223,7 +235,9 @@ class CanvasTextDelegate(
             position: Offset = Offset.Zero,
             cursorColor: Color = Color.Black,
             selectionColor: Color = Color.Blue.copy(alpha = SELECTION_ALPHA),
-            showCursor: Boolean = true
+            handleColor: Color = Color.Blue,
+            showCursor: Boolean = true,
+            showHandles: Boolean = true
         ) {
             canvas.save()
             canvas.translate(position.x, position.y)
@@ -263,6 +277,43 @@ class CanvasTextDelegate(
                 )
             }
 
+            // Draw selection handles
+            if (showHandles && state.hasFocus && state.handleState != HandleState.None) {
+                when (state.handleState) {
+                    HandleState.Selection -> {
+                        if (state.hasSelection) {
+                            // Draw start handle (left side, pointing left)
+                            val startRect = textLayoutResult.getCursorRect(state.selection.min)
+                            drawSelectionHandle(
+                                canvas = composeCanvas,
+                                position = Offset(startRect.left, startRect.bottom),
+                                color = handleColor,
+                                isStart = true
+                            )
+                            
+                            // Draw end handle (right side, pointing right)
+                            val endRect = textLayoutResult.getCursorRect(state.selection.max)
+                            drawSelectionHandle(
+                                canvas = composeCanvas,
+                                position = Offset(endRect.left, endRect.bottom),
+                                color = handleColor,
+                                isStart = false
+                            )
+                        }
+                    }
+                    HandleState.Cursor -> {
+                        // Draw cursor handle (centered below cursor)
+                        val cursorRect = textLayoutResult.getCursorRect(state.selection.start)
+                        drawCursorHandle(
+                            canvas = composeCanvas,
+                            position = Offset(cursorRect.left + DEFAULT_CURSOR_WIDTH / 2, cursorRect.bottom),
+                            color = handleColor
+                        )
+                    }
+                    HandleState.None -> { /* No handles */ }
+                }
+            }
+
             canvas.restore()
         }
 
@@ -276,7 +327,9 @@ class CanvasTextDelegate(
             position: Offset = Offset.Zero,
             cursorColor: Color = Color.Black,
             selectionColor: Color = Color.Blue.copy(alpha = SELECTION_ALPHA),
-            showCursor: Boolean = true
+            handleColor: Color = Color.Blue,
+            showCursor: Boolean = true,
+            showHandles: Boolean = true
         ) {
             draw(
                 canvas = canvas.nativeCanvas,
@@ -285,7 +338,9 @@ class CanvasTextDelegate(
                 position = position,
                 cursorColor = cursorColor,
                 selectionColor = selectionColor,
-                showCursor = showCursor
+                handleColor = handleColor,
+                showCursor = showCursor,
+                showHandles = showHandles
             )
         }
 
@@ -371,6 +426,165 @@ class CanvasTextDelegate(
                 p1 = Offset(startRect.left, y),
                 p2 = Offset(endRect.right, y),
                 paint = paint
+            )
+        }
+
+        /**
+         * Draw a selection handle (teardrop shape pointing to the text).
+         *
+         * @param canvas The canvas to draw on
+         * @param position The position where the handle connects to text (top of stem)
+         * @param color The handle color
+         * @param isStart True for start handle (points left), false for end handle (points right)
+         * @param radius The radius of the circular part
+         * @param stemHeight The height of the stem connecting to text
+         */
+        private fun drawSelectionHandle(
+            canvas: androidx.compose.ui.graphics.Canvas,
+            position: Offset,
+            color: Color,
+            isStart: Boolean,
+            radius: Float = HANDLE_RADIUS,
+            stemHeight: Float = HANDLE_STEM_HEIGHT
+        ) {
+            val paint = Paint().apply {
+                this.color = color
+                style = PaintingStyle.Fill
+            }
+
+            // Draw stem (thin rectangle from text to circle)
+            val stemWidth = 3f
+            canvas.drawRect(
+                Rect(
+                    left = position.x - stemWidth / 2,
+                    top = position.y,
+                    right = position.x + stemWidth / 2,
+                    bottom = position.y + stemHeight
+                ),
+                paint
+            )
+
+            // Draw circle at bottom of stem
+            // For start handle, circle is offset to the left
+            // For end handle, circle is offset to the right
+            val circleOffset = if (isStart) -radius / 2 else radius / 2
+            val circleCenter = Offset(
+                x = position.x + circleOffset,
+                y = position.y + stemHeight + radius
+            )
+            canvas.drawCircle(circleCenter, radius, paint)
+        }
+
+        /**
+         * Draw a cursor handle (teardrop shape centered below cursor).
+         *
+         * @param canvas The canvas to draw on
+         * @param position The position where the handle connects to cursor (top of stem)
+         * @param color The handle color
+         * @param radius The radius of the circular part
+         * @param stemHeight The height of the stem connecting to cursor
+         */
+        private fun drawCursorHandle(
+            canvas: androidx.compose.ui.graphics.Canvas,
+            position: Offset,
+            color: Color,
+            radius: Float = HANDLE_RADIUS,
+            stemHeight: Float = HANDLE_STEM_HEIGHT
+        ) {
+            val paint = Paint().apply {
+                this.color = color
+                style = PaintingStyle.Fill
+            }
+
+            // Draw stem
+            val stemWidth = 3f
+            canvas.drawRect(
+                Rect(
+                    left = position.x - stemWidth / 2,
+                    top = position.y,
+                    right = position.x + stemWidth / 2,
+                    bottom = position.y + stemHeight
+                ),
+                paint
+            )
+
+            // Draw circle centered below stem
+            val circleCenter = Offset(
+                x = position.x,
+                y = position.y + stemHeight + radius
+            )
+            canvas.drawCircle(circleCenter, radius, paint)
+        }
+
+        /**
+         * Get the bounding rect for a selection start handle.
+         * Used for hit testing.
+         */
+        fun getStartHandleRect(
+            textLayoutResult: TextLayoutResult,
+            selectionStart: Int,
+            radius: Float = HANDLE_RADIUS,
+            stemHeight: Float = HANDLE_STEM_HEIGHT
+        ): Rect {
+            val cursorRect = textLayoutResult.getCursorRect(selectionStart)
+            val handleTop = cursorRect.bottom
+            val circleCenter = Offset(
+                x = cursorRect.left - radius / 2,
+                y = handleTop + stemHeight + radius
+            )
+            return Rect(
+                left = circleCenter.x - radius,
+                top = handleTop,
+                right = circleCenter.x + radius,
+                bottom = circleCenter.y + radius
+            )
+        }
+
+        /**
+         * Get the bounding rect for a selection end handle.
+         * Used for hit testing.
+         */
+        fun getEndHandleRect(
+            textLayoutResult: TextLayoutResult,
+            selectionEnd: Int,
+            radius: Float = HANDLE_RADIUS,
+            stemHeight: Float = HANDLE_STEM_HEIGHT
+        ): Rect {
+            val cursorRect = textLayoutResult.getCursorRect(selectionEnd)
+            val handleTop = cursorRect.bottom
+            val circleCenter = Offset(
+                x = cursorRect.left + radius / 2,
+                y = handleTop + stemHeight + radius
+            )
+            return Rect(
+                left = circleCenter.x - radius,
+                top = handleTop,
+                right = circleCenter.x + radius,
+                bottom = circleCenter.y + radius
+            )
+        }
+
+        /**
+         * Get the bounding rect for a cursor handle.
+         * Used for hit testing.
+         */
+        fun getCursorHandleRect(
+            textLayoutResult: TextLayoutResult,
+            cursorOffset: Int,
+            radius: Float = HANDLE_RADIUS,
+            stemHeight: Float = HANDLE_STEM_HEIGHT
+        ): Rect {
+            val cursorRect = textLayoutResult.getCursorRect(cursorOffset)
+            val handleTop = cursorRect.bottom
+            val circleCenter = Offset(
+                x = cursorRect.left + DEFAULT_CURSOR_WIDTH / 2,
+                y = handleTop + stemHeight + radius
+            )
+            return Rect(
+                left = circleCenter.x - radius,
+                top = handleTop,
+                right = circleCenter.x + radius,
+                bottom = circleCenter.y + radius
             )
         }
 
