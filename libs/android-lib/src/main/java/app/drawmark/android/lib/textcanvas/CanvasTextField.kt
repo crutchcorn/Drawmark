@@ -268,8 +268,26 @@ fun CanvasTextField(
 
         val isCtrl = keyEvent.isCtrlPressed
         val isShift = keyEvent.isShiftPressed
+        val isAlt = keyEvent.isAltPressed
+        val isMeta = keyEvent.isMetaPressed
 
         when {
+            // Backspace (check first to handle Ctrl+Backspace before other Ctrl shortcuts)
+            keyEvent.key == Key.Backspace -> {
+                if (!readOnly) {
+                    when {
+                        // Meta+Backspace (Cmd+Backspace on Mac) - delete to line start
+                        isMeta -> state.deleteToLineStart()
+                        // Alt+Backspace or Ctrl+Backspace - delete word backward
+                        isAlt || isCtrl -> state.deleteWordBackward()
+                        // Regular backspace
+                        else -> state.deleteBackward()
+                    }
+                    currentOnValueChange(state.value)
+                }
+                true
+            }
+
             // Copy (Ctrl+C)
             isCtrl && keyEvent.key == Key.C -> {
                 if (state.hasSelection) {
@@ -323,7 +341,7 @@ fun CanvasTextField(
 
             // Arrow Left
             keyEvent.key == Key.DirectionLeft -> {
-                if (isCtrl) {
+                if (isCtrl || isAlt) {
                     state.moveCursorLeftByWord(extendSelection = isShift)
                 } else {
                     state.moveCursorLeft(extendSelection = isShift)
@@ -333,7 +351,7 @@ fun CanvasTextField(
 
             // Arrow Right
             keyEvent.key == Key.DirectionRight -> {
-                if (isCtrl) {
+                if (isCtrl || isAlt) {
                     state.moveCursorRightByWord(extendSelection = isShift)
                 } else {
                     state.moveCursorRight(extendSelection = isShift)
@@ -350,15 +368,6 @@ fun CanvasTextField(
             // End
             keyEvent.key == Key.MoveEnd -> {
                 state.moveCursorToEnd(extendSelection = isShift)
-                true
-            }
-
-            // Backspace
-            keyEvent.key == Key.Backspace -> {
-                if (!readOnly) {
-                    state.deleteBackward()
-                    currentOnValueChange(state.value)
-                }
                 true
             }
 
