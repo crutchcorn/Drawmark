@@ -2,7 +2,7 @@ import * as React from 'react';
 import { StyleSheet, Pressable, Text, View } from 'react-native';
 import * as PopoverPrimitive from '@rn-primitives/popover';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { InkEditorBrushFamily } from '../../../../components/InkEditor';
+import { InkEditorBrushFamily, InkEditorMode } from '../../../../components/InkEditor';
 import { useRef } from 'react';
 import { Colors } from '../../constants/colors';
 import { VariableContextProvider } from 'nativewind';
@@ -57,6 +57,7 @@ interface BrushButtonProps {
   setFamily: (family: InkEditorBrushFamily) => void;
   color: string;
   setColor: (color: string) => void;
+  editingMode: InkEditorMode;
   Icon: React.FC<{ activeColor: string; className: string }>;
 }
 
@@ -66,17 +67,18 @@ export function BrushButton({
   setFamily,
   color,
   setColor,
+  editingMode,
   Icon,
 }: BrushButtonProps) {
   const ref = useRef<PopoverPrimitive.TriggerRef>(null);
-  const isSelected = family === currentFamily;
+  const isSelected = family === currentFamily && editingMode === 'draw';
 
   return (
     <PopoverPrimitive.Root>
       <PopoverPrimitive.Trigger ref={ref}>
         <Pressable
           onPress={() => {
-            if (family === currentFamily) {
+            if (isSelected) {
               ref.current?.open();
               return;
             }

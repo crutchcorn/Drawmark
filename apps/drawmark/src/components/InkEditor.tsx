@@ -26,6 +26,7 @@ interface InkEditorNativeProps {
   brushColor?: string;
   brushSize?: number;
   brushFamily?: 'pen' | 'marker' | 'highlighter';
+  mode?: 'draw' | 'text';
   onStrokesChange?: (event: NativeSyntheticEvent<StrokesChangeEvent>) => void;
 }
 
@@ -35,6 +36,8 @@ export interface InkEditorRef {
 }
 
 export type InkEditorBrushFamily = 'pen' | 'marker' | 'highlighter';
+
+export type InkEditorMode = 'draw' | 'text' | null;
 
 export interface InkEditorBrushInfo {
   color: string;
@@ -62,6 +65,13 @@ export interface InkEditorProps {
    * @default "pen"
    */
   brushFamily?: InkEditorBrushFamily;
+  /**
+   * The editor mode.
+   * - "draw": Drawing mode - touch creates ink strokes (default)
+   * - "text": Text mode - tap creates/edits text fields
+   * @default "draw"
+   */
+  mode?: InkEditorMode;
   /**
    * Initial strokes to load when the editor mounts.
    * This should be a JSON string from a previous save.
@@ -93,6 +103,7 @@ export const InkEditor = forwardRef<InkEditorRef, InkEditorProps>(
       brushColor = '#000000',
       brushSize = 5,
       brushFamily = 'pen',
+      mode = 'draw',
       initialStrokes,
       onStrokesChange,
     },
@@ -158,6 +169,7 @@ export const InkEditor = forwardRef<InkEditorRef, InkEditorProps>(
         brushColor={brushColor}
         brushSize={brushSize}
         brushFamily={brushFamily}
+        mode={mode}
         onStrokesChange={handleStrokesChange}
       />
     );

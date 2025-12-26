@@ -70,6 +70,13 @@ class InkEditorViewManager(
         }
     }
 
+    @ReactProp(name = "mode")
+    fun setMode(view: InkEditorView, mode: String?) {
+        mode?.let {
+            view.setEditorMode(it)
+        }
+    }
+
     override fun getCommandsMap(): Map<String, Int> {
         return mapOf(
             "clear" to COMMAND_CLEAR,

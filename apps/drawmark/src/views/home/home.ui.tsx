@@ -4,6 +4,7 @@ import {
   InkEditor,
   InkEditorBrushFamily,
   InkEditorBrushInfo,
+  InkEditorMode,
   InkEditorRef,
 } from '../../components/InkEditor';
 import { InkCanvas } from '../../components/InkCanvas';
@@ -17,41 +18,43 @@ interface HomeUIProps {
   canvasRef: RefObject<InkEditorRef | null>;
   initialStrokes: string | undefined;
   handleStrokesChange: (strokesJson: string) => void;
-  isEditing: boolean;
-  setIsEditing: (val: boolean) => void;
   brushInfo: InkEditorBrushInfo;
   setBrushInfo: (info: InkEditorBrushInfo) => void;
+  editingMode: InkEditorMode;
+  setEditingMode: (mode: InkEditorMode) => void;
 }
 
 export function HomeUI({
   canvasRef,
   initialStrokes,
   handleStrokesChange,
-  isEditing,
-  setIsEditing,
   brushInfo,
   setBrushInfo,
+  editingMode,
+  setEditingMode,
 }: HomeUIProps) {
   const handleClear = () => {
     canvasRef.current?.clear();
   };
 
   const handleEditToggle = () => {
-    setIsEditing(!isEditing);
+    setEditingMode('draw');
   };
 
   const save = () => {
-    setIsEditing(!isEditing);
+    setEditingMode(null);
   };
 
-  const setFamily = (family: InkEditorBrushFamily) =>
+  const setFamily = (family: InkEditorBrushFamily) => {
     setBrushInfo({ ...brushInfo, family });
+    setEditingMode('draw');
+  };
 
   const setColor = (color: string) => setBrushInfo({ ...brushInfo, color });
 
   return (
     <View className="safe relative flex-1">
-      {isEditing ? (
+      {editingMode ? (
         <InkEditor
           initialStrokes={initialStrokes}
           onStrokesChange={handleStrokesChange}
@@ -59,12 +62,13 @@ export function HomeUI({
           brushColor={brushInfo.color}
           brushSize={brushInfo.size}
           brushFamily={brushInfo.family}
+          mode={editingMode}
           style={{ flex: 1 }}
         />
       ) : (
         <InkCanvas initialStrokes={initialStrokes} style={{ flex: 1 }} />
       )}
-      {isEditing ? (
+      {editingMode ? (
         <View className="absolute bottom-12 w-full pr-10 pl-10">
           <View
             className={`flex flex-row items-center space-x-4 rounded-full border-2 border-gray-300 bg-white pr-4 pl-4 shadow-lg`}
@@ -76,6 +80,7 @@ export function HomeUI({
               setFamily={setFamily}
               color={brushInfo.color}
               setColor={setColor}
+              editingMode={editingMode}
             />
             <BrushButton
               Icon={MarkerIcon}
@@ -84,6 +89,7 @@ export function HomeUI({
               setFamily={setFamily}
               color={brushInfo.color}
               setColor={setColor}
+              editingMode={editingMode}
             />
             <BrushButton
               Icon={HighlighterIcon}
@@ -92,7 +98,22 @@ export function HomeUI({
               setFamily={setFamily}
               color={brushInfo.color}
               setColor={setColor}
+              editingMode={editingMode}
             />
+            <Pressable
+              onPress={() => setEditingMode('text')}
+              className={`rounded-full p-2 ${
+                editingMode === 'text' ? 'bg-gray-200' : ''
+              }`}
+            >
+              <Text
+                className={`text-xl font-bold ${
+                  editingMode === 'text' ? 'text-black' : 'text-gray-500'
+                }`}
+              >
+                T
+              </Text>
+            </Pressable>
             <View className="grow" />
             <Pressable
               className="ml-2 rounded-full border-2 border-orange-400 p-4 pr-8 pl-8"

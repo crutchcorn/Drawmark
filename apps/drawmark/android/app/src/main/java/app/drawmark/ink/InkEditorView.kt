@@ -14,8 +14,10 @@ import androidx.ink.brush.Brush
 import androidx.ink.brush.StockBrushes
 import androidx.ink.rendering.android.canvas.CanvasStrokeRenderer
 import androidx.ink.strokes.Stroke
+import app.drawmark.android.lib.ink.InkEditorMode
 import app.drawmark.android.lib.ink.InkEditorSurface
 import app.drawmark.android.lib.ink.StrokeSerializer
+import app.drawmark.android.lib.textcanvas.rememberInkCanvasTextFieldManager
 import kotlin.collections.plus
 
 
@@ -34,6 +36,9 @@ class InkEditorView(context: Context) : FrameLayout(context), InProgressStrokesF
     private var brushColorState = mutableStateOf(Color.Black.toArgb())
     private var brushSizeState = mutableStateOf(5f)
     private var brushFamilyState = mutableStateOf(StockBrushes.pressurePen())
+    
+    // Editor mode - Draw or Text
+    private var editorModeState = mutableStateOf(InkEditorMode.Draw)
 
     init {
         inProgressStrokesView.addFinishedStrokesListener(this)
@@ -44,6 +49,10 @@ class InkEditorView(context: Context) : FrameLayout(context), InProgressStrokesF
                 val currentBrushColor = brushColorState.value
                 val currentBrushSize = brushSizeState.value
                 val currentBrushFamily = brushFamilyState.value
+                val currentMode = editorModeState.value
+                
+                // Text field manager for text mode
+                val textFieldManager = rememberInkCanvasTextFieldManager()
                 
                 InkEditorSurface(
                     inProgressStrokesView = inProgressStrokesView,
@@ -56,7 +65,9 @@ class InkEditorView(context: Context) : FrameLayout(context), InProgressStrokesF
                             size = currentBrushSize,
                             epsilon = 0.1f
                         )
-                    }
+                    },
+                    mode = currentMode,
+                    textFieldManager = textFieldManager
                 )
             }
         }
@@ -96,6 +107,17 @@ class InkEditorView(context: Context) : FrameLayout(context), InProgressStrokesF
             "marker" -> StockBrushes.marker()
             "highlighter" -> StockBrushes.highlighter()
             else -> StockBrushes.pressurePen()
+        }
+    }
+
+    /**
+     * Sets the editor mode.
+     * Supported values: "draw", "text"
+     */
+    fun setEditorMode(mode: String) {
+        editorModeState.value = when (mode.lowercase()) {
+            "text" -> InkEditorMode.Text
+            else -> InkEditorMode.Draw
         }
     }
 
