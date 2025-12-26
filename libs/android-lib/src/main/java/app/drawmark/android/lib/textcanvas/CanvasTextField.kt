@@ -3,10 +3,7 @@ package app.drawmark.android.lib.textcanvas
 import android.graphics.Matrix
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -76,6 +73,8 @@ import kotlinx.coroutines.isActive
  * @param maxLines Maximum number of lines (ignored if singleLine is true)
  * @param imeOptions IME options for the software keyboard
  * @param onImeAction Callback when an IME action is performed
+ * @param handlePointerInput Whether this composable should handle pointer input.
+ *                           Set to false when managed by InkCanvas which handles gestures.
  */
 @Composable
 fun CanvasTextField(
@@ -90,7 +89,8 @@ fun CanvasTextField(
     singleLine: Boolean = false,
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     imeOptions: ImeOptions = ImeOptions.Default,
-    onImeAction: (ImeAction) -> Unit = {}
+    onImeAction: (ImeAction) -> Unit = {},
+    handlePointerInput: Boolean = true
 ) {
     val density = LocalDensity.current
     val fontFamilyResolver = LocalFontFamilyResolver.current
@@ -396,127 +396,53 @@ fun CanvasTextField(
         }
     }
 
-    // Handle dragging gesture modifier
-    val handleDragModifier = Modifier.pointerInput(enabled, state, textLayoutResult) {
-        if (!enabled) return@pointerInput
-        val layoutResult = textLayoutResult ?: return@pointerInput
-
-        awaitEachGesture {
-            val down = awaitFirstDown(requireUnconsumed = false)
-            val downPos = down.position
-
-            // Check if we hit a handle
-            var hitHandle: DraggingHandle? = null
-            
-            if (state.hasFocus && state.handleState != HandleState.None) {
-                when (state.handleState) {
-                    HandleState.Selection -> {
-                        if (state.hasSelection) {
-                            val startRect = CanvasTextDelegate.getStartHandleRect(
-                                layoutResult, state.selection.min
-                            )
-                            val endRect = CanvasTextDelegate.getEndHandleRect(
-                                layoutResult, state.selection.max
-                            )
-                            
-                            // Expand hit areas for easier touch
-                            val touchSlop = 16f
-                            val expandedStartRect = startRect.inflate(touchSlop)
-                            val expandedEndRect = endRect.inflate(touchSlop)
-                            
-                            when {
-                                expandedStartRect.contains(downPos) -> {
-                                    hitHandle = DraggingHandle.Start
-                                }
-                                expandedEndRect.contains(downPos) -> {
-                                    hitHandle = DraggingHandle.End
-                                }
-                            }
-                        }
-                    }
-                    HandleState.Cursor -> {
-                        val cursorRect = CanvasTextDelegate.getCursorHandleRect(
-                            layoutResult, state.selection.start
-                        )
-                        val touchSlop = 16f
-                        val expandedRect = cursorRect.inflate(touchSlop)
-                        
-                        if (expandedRect.contains(downPos)) {
-                            hitHandle = DraggingHandle.Cursor
-                        }
-                    }
-                    HandleState.None -> { /* No handles to drag */ }
-                }
-            }
-
-            if (hitHandle != null) {
-                down.consume()
-                state.startDraggingHandle(hitHandle)
-                
-                drag(down.id) { change ->
-                    change.consume()
-                    val offset = layoutResult.getOffsetForPosition(change.position)
-                    
-                    when (state.draggingHandle) {
-                        DraggingHandle.Start -> state.updateSelectionStart(offset)
-                        DraggingHandle.End -> state.updateSelectionEnd(offset)
-                        DraggingHandle.Cursor -> state.placeCursor(offset)
-                        null -> { /* Not dragging */ }
-                    }
-                    currentOnValueChange(state.value)
-                }
-                
-                state.stopDraggingHandle()
-            }
-        }
-    }
-
-    // Touch input handling for taps (separate from drag handling)
-    val pointerModifier = Modifier.pointerInput(enabled, state, textLayoutResult) {
-        if (!enabled) return@pointerInput
-
-        detectTapGestures(
-            onTap = { offset ->
-                // Request focus
-                focusRequester.requestFocus()
-
-                // Position cursor at tap location
-                textLayoutResult?.let { layoutResult ->
-                    val textOffset = layoutResult.getOffsetForPosition(offset)
-                    state.placeCursor(textOffset)
-                    state.handleState = HandleState.Cursor
-                }
-            },
-            onDoubleTap = { offset ->
-                // Select word at position
-                textLayoutResult?.let { layoutResult ->
-                    val textOffset = layoutResult.getOffsetForPosition(offset)
-                    val wordBoundary = layoutResult.getWordBoundary(textOffset)
-                    state.updateSelection(TextRange(wordBoundary.start, wordBoundary.end))
-                    state.handleState = HandleState.Selection
-                }
-            },
-            onLongPress = { offset ->
-                // Start selection mode
-                focusRequester.requestFocus()
-
-                textLayoutResult?.let { layoutResult ->
-                    val textOffset = layoutResult.getOffsetForPosition(offset)
-                    val wordBoundary = layoutResult.getWordBoundary(textOffset)
-                    state.updateSelection(TextRange(wordBoundary.start, wordBoundary.end))
-                    state.handleState = HandleState.Selection
-                }
-            }
-        )
-    }
-
     // Calculate size for the Box
     val layoutSize = state.layoutSize
     val minWidth = 100.dp
     val minHeight = 24.dp
     
-    // Calculate extra height needed for handles
-    val handleHeight = CanvasTextDelegate.HANDLE_RADIUS * 2 + CanvasTextDelegate.HANDLE_STEM_HEIGHT
+    // Calculate extra height needed for handles (only if we're handling pointer input ourselves)
+    val handleHeight = if (handlePointerInput) {
+        CanvasTextDelegate.HANDLE_RADIUS * 2 + CanvasTextDelegate.HANDLE_STEM_HEIGHT
+    } else {
+        0f
+    }
+
+    // Build the pointer input modifier conditionally
+    val pointerModifier = if (handlePointerInput) {
+        Modifier.pointerInput(Unit) {
+            detectTapGestures(
+                onTap = { offset ->
+                    if (!enabled) return@detectTapGestures
+                    focusRequester.requestFocus()
+                    textLayoutResult?.let { layoutResult ->
+                        val textOffset = layoutResult.getOffsetForPosition(offset)
+                        state.placeCursor(textOffset)
+                        state.handleState = HandleState.Cursor
+                    }
+                },
+                onDoubleTap = { offset ->
+                    textLayoutResult?.let { layoutResult ->
+                        val textOffset = layoutResult.getOffsetForPosition(offset)
+                        val wordBoundary = layoutResult.getWordBoundary(textOffset)
+                        state.updateSelection(TextRange(wordBoundary.start, wordBoundary.end))
+                        state.handleState = HandleState.Selection
+                    }
+                },
+                onLongPress = { offset ->
+                    focusRequester.requestFocus()
+                    textLayoutResult?.let { layoutResult ->
+                        val textOffset = layoutResult.getOffsetForPosition(offset)
+                        val wordBoundary = layoutResult.getWordBoundary(textOffset)
+                        state.updateSelection(TextRange(wordBoundary.start, wordBoundary.end))
+                        state.handleState = HandleState.Selection
+                    }
+                }
+            )
+        }
+    } else {
+        Modifier
+    }
 
     Box(
         modifier = modifier
@@ -526,7 +452,6 @@ fun CanvasTextField(
             )
             .then(focusModifier)
             .then(keyboardModifier)
-            .then(handleDragModifier)
             .then(pointerModifier)
     ) {
         Canvas(modifier = Modifier.matchParentSize()) {
@@ -641,4 +566,16 @@ fun rememberCanvasTextFieldState(
     return remember {
         CanvasTextFieldState.withText(initialText, initialPosition)
     }
+}
+
+/**
+ * Expands a Rect by the given amount in all directions.
+ */
+private fun androidx.compose.ui.geometry.Rect.inflate(delta: Float): androidx.compose.ui.geometry.Rect {
+    return androidx.compose.ui.geometry.Rect(
+        left = left - delta,
+        top = top - delta,
+        right = right + delta,
+        bottom = bottom + delta
+    )
 }

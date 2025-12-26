@@ -1,7 +1,11 @@
 package app.drawmark.android.lib.textcanvas
 
 import android.graphics.Matrix
+import android.util.Log
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.drag
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -12,9 +16,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 
@@ -192,6 +199,130 @@ class InkCanvasTextFieldManager {
             return true
         }
         return false
+    }
+
+    /**
+     * Data class representing a handle hit test result.
+     */
+    data class HandleHitResult(
+        val textField: CanvasTextFieldState,
+        val handleType: DraggingHandle
+    )
+
+    /**
+     * Helper function to inflate a Rect for touch tolerance.
+     */
+    private fun Rect.inflate(delta: Float): Rect {
+        return Rect(
+            left = left - delta,
+            top = top - delta,
+            right = right + delta,
+            bottom = bottom + delta
+        )
+    }
+
+    /**
+     * Check if a position hits any selection handle.
+     *
+     * @param position The position in canvas coordinates
+     * @return HandleHitResult if a handle was hit, null otherwise
+     */
+    fun hitTestHandle(position: Offset): HandleHitResult? {
+        val touchTolerance = 24f // Extra touch area around handles
+
+        for (textField in textFields.asReversed()) {
+            val layoutResult = textField.textLayoutResult ?: continue
+            if (!textField.hasFocus) continue
+
+            // Convert position to text field local coordinates
+            val localPosition = textField.canvasToLocal(position)
+
+            when (textField.handleState) {
+                HandleState.Selection -> {
+                    // Check start handle
+                    val startRect = CanvasTextDelegate.getStartHandleRect(
+                        layoutResult,
+                        textField.value.selection.start
+                    ).inflate(touchTolerance)
+                    if (startRect.contains(localPosition)) {
+                        Log.d("HandleDrag", "Hit START handle at $position (local: $localPosition)")
+                        return HandleHitResult(textField, DraggingHandle.Start)
+                    }
+
+                    // Check end handle
+                    val endRect = CanvasTextDelegate.getEndHandleRect(
+                        layoutResult,
+                        textField.value.selection.end
+                    ).inflate(touchTolerance)
+                    if (endRect.contains(localPosition)) {
+                        Log.d("HandleDrag", "Hit END handle at $position (local: $localPosition)")
+                        return HandleHitResult(textField, DraggingHandle.End)
+                    }
+                }
+                HandleState.Cursor -> {
+                    // Check cursor handle
+                    val cursorRect = CanvasTextDelegate.getCursorHandleRect(
+                        layoutResult,
+                        textField.value.selection.start
+                    ).inflate(touchTolerance)
+                    if (cursorRect.contains(localPosition)) {
+                        Log.d("HandleDrag", "Hit CURSOR handle at $position (local: $localPosition)")
+                        return HandleHitResult(textField, DraggingHandle.Cursor)
+                    }
+                }
+                HandleState.None -> {
+                    // No handles to hit
+                }
+            }
+        }
+        return null
+    }
+
+    /**
+     * Start dragging a handle.
+     */
+    fun startDraggingHandle(textField: CanvasTextFieldState, handleType: DraggingHandle) {
+        Log.d("HandleDrag", "Starting drag on ${handleType.name} handle")
+        textField.draggingHandle = handleType
+    }
+
+    /**
+     * Update handle position during drag.
+     *
+     * @param textField The text field being edited
+     * @param handleType Which handle is being dragged
+     * @param position The new position in canvas coordinates
+     */
+    fun updateHandleDrag(
+        textField: CanvasTextFieldState,
+        handleType: DraggingHandle,
+        position: Offset
+    ) {
+        val layoutResult = textField.textLayoutResult ?: return
+        val localPosition = textField.canvasToLocal(position)
+        val newOffset = layoutResult.getOffsetForPosition(localPosition)
+
+        Log.d("HandleDrag", "Drag update: ${handleType.name} -> offset $newOffset")
+
+        when (handleType) {
+            DraggingHandle.Start -> {
+                textField.updateSelectionStart(newOffset)
+            }
+            DraggingHandle.End -> {
+                textField.updateSelectionEnd(newOffset)
+            }
+            DraggingHandle.Cursor -> {
+                textField.placeCursor(newOffset)
+            }
+        }
+    }
+
+    /**
+     * Stop dragging a handle.
+     */
+    fun stopDraggingHandle(textField: CanvasTextFieldState) {
+        Log.d("HandleDrag", "Stopping drag on ${textField.draggingHandle?.name} handle")
+        textField.draggingHandle = null
     }
 
     /**

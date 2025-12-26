@@ -1,10 +1,15 @@
 package app.drawmark.android.lib.ink
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.drag
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -12,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerEventTimeoutCancellationException
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.ink.authoring.InProgressStrokeId
@@ -161,29 +167,90 @@ fun InkEditorSurface(
             isTextMode = mode == InkEditorMode.Text
         )
         
-        // In text mode, add an invisible touch layer on top to capture taps
+        // In text mode, add an invisible touch layer on top to capture taps and handle drags
         // This is needed because AndroidView intercepts events before Compose modifiers
         if (mode == InkEditorMode.Text && textFieldManager != null) {
+            // Constants for gesture detection
+            val longPressTimeoutMillis = 500L
+            val doubleTapTimeoutMillis = 300L
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .pointerInput(textFieldManager) {
-                        detectTapGestures(
-                            onTap = { position ->
-                                // First try to tap an existing text field
-                                if (!textFieldManager.handleTap(position)) {
+                        awaitEachGesture {
+                            val down = awaitFirstDown(requireUnconsumed = false)
+                            val downPosition = down.position
+                            Log.d("InkEditorGesture", "Down at $downPosition")
+
+                            // First, check if this is a handle hit
+                            val handleHit = textFieldManager.hitTestHandle(downPosition)
+                            if (handleHit != null) {
+                                Log.d("InkEditorGesture", "Handle hit: ${handleHit.handleType}")
+                                down.consume()
+
+                                // Start dragging the handle
+                                textFieldManager.startDraggingHandle(handleHit.textField, handleHit.handleType)
+
+                                // Follow the drag
+                                drag(down.id) { change ->
+                                    change.consume()
+                                    textFieldManager.updateHandleDrag(
+                                        handleHit.textField,
+                                        handleHit.handleType,
+                                        change.position
+                                    )
+                                }
+
+                                // Drag ended
+                                textFieldManager.stopDraggingHandle(handleHit.textField)
+                                return@awaitEachGesture
+                            }
+
+                            // Not a handle hit - detect tap, double-tap, or long-press
+                            var upOrCancel: androidx.compose.ui.geometry.Offset? = null
+
+                            // Try to detect long press
+                            try {
+                                withTimeout(longPressTimeoutMillis) {
+                                    val up = waitForUpOrCancellation()
+                                    upOrCancel = up?.position
+                                }
+                            } catch (e: PointerEventTimeoutCancellationException) {
+                                // Long press detected
+                                Log.d("InkEditorGesture", "Long press at $downPosition")
+                                textFieldManager.handleLongPress(downPosition)
+                                // Wait for up to complete the gesture
+                                waitForUpOrCancellation()
+                                return@awaitEachGesture
+                            }
+
+                            if (upOrCancel == null) {
+                                // Cancelled
+                                return@awaitEachGesture
+                            }
+
+                            // It was a tap - now check for double tap
+                            try {
+                                withTimeout(doubleTapTimeoutMillis) {
+                                    val secondDown = awaitFirstDown()
+                                    // Got a second tap - wait for up
+                                    val secondUp = waitForUpOrCancellation()
+                                    if (secondUp != null) {
+                                        Log.d("InkEditorGesture", "Double tap at ${secondDown.position}")
+                                        textFieldManager.handleDoubleTap(secondDown.position)
+                                    }
+                                }
+                            } catch (e: PointerEventTimeoutCancellationException) {
+                                // Single tap
+                                Log.d("InkEditorGesture", "Single tap at $downPosition")
+                                if (!textFieldManager.handleTap(downPosition)) {
                                     // No text field was tapped - create a new one
-                                    val newTextField = textFieldManager.addTextField(position, "")
+                                    val newTextField = textFieldManager.addTextField(downPosition, "")
                                     textFieldManager.requestFocus(newTextField)
                                 }
-                            },
-                            onDoubleTap = { position ->
-                                textFieldManager.handleDoubleTap(position)
-                            },
-                            onLongPress = { position ->
-                                textFieldManager.handleLongPress(position)
                             }
-                        )
+                        }
                     }
             )
         }
