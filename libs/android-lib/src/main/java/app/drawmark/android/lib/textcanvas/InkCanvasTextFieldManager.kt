@@ -100,12 +100,12 @@ class InkCanvasTextFieldManager {
      * @param state The text field to focus, or null to clear focus
      */
     fun requestFocus(state: CanvasTextFieldState?) {
-        // Clear previous focus
-        focusedTextField?.hasFocus = false
+        // Clear previous focus request
+        focusedTextField?.focusRequested = false
 
         // Set new focus
         focusedTextField = state
-        state?.hasFocus = true
+        state?.focusRequested = true
     }
 
     /**

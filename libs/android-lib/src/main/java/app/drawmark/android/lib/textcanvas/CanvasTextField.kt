@@ -96,6 +96,20 @@ fun CanvasTextField(
     val focusRequester = remember { FocusRequester() }
     val coroutineScope = rememberCoroutineScope()
 
+    // When state.focusRequested becomes true (set by manager), request Compose focus
+    LaunchedEffect(state.focusRequested) {
+        if (state.focusRequested) {
+            try {
+                focusRequester.requestFocus()
+                keyboardController?.show()
+                // Clear the request flag after handling
+                state.focusRequested = false
+            } catch (_: Exception) {
+                // Focus request may fail if component not yet attached
+            }
+        }
+    }
+
     // Track enabled/readOnly in state
     state.enabled = enabled
     state.readOnly = readOnly
@@ -134,8 +148,28 @@ fun CanvasTextField(
 
         textLayoutResult?.let { result ->
             state.textLayoutResult = result
-            state.layoutSize = Size(result.size.width.toFloat(), result.size.height.toFloat())
+            // Ensure minimum size even for empty text
+            val minWidth = with(density) { 100.dp.toPx() }
+            val minHeight = with(density) { 24.dp.toPx() }
+            state.layoutSize = Size(
+                maxOf(result.size.width.toFloat(), minWidth),
+                maxOf(result.size.height.toFloat(), minHeight)
+            )
         }
+        
+        // If no layout result yet, still set a minimum size
+        if (textLayoutResult == null) {
+            val minWidth = with(density) { 100.dp.toPx() }
+            val minHeight = with(density) { 24.dp.toPx() }
+            state.layoutSize = Size(minWidth, minHeight)
+        }
+    }
+    
+    // Ensure minimum layout size even if delegate is null
+    if (state.layoutSize == Size.Zero) {
+        val minWidth = with(density) { 100.dp.toPx() }
+        val minHeight = with(density) { 24.dp.toPx() }
+        state.layoutSize = Size(minWidth, minHeight)
     }
 
     // IME session management

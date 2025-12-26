@@ -65,6 +65,12 @@ class CanvasTextFieldState(
      */
     var hasFocus by mutableStateOf(false)
         internal set
+    
+    /**
+     * Whether focus has been requested externally (by the manager).
+     * This is separate from hasFocus to avoid race conditions with Compose's focus system.
+     */
+    var focusRequested by mutableStateOf(false)
 
     /**
      * Whether the cursor should be visible (for blinking animation).
