@@ -1,9 +1,10 @@
-import { Svg, Path } from 'react-native-svg';
+import { Path } from 'react-native-svg';
 import { IconProps } from './types';
+import { Svg } from '../Svg';
 
-export function MarkerIcon({ activeColor }: IconProps) {
+export function MarkerIcon({ activeColor, ...props }: IconProps) {
   return (
-    <Svg viewBox="0 0 480 480" fill="none">
+    <Svg  {...props} viewBox="0 0 480 480" fill="none">
       <Path
         fill-rule="evenodd"
         clip-rule="evenodd"

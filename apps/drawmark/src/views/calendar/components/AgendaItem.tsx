@@ -6,7 +6,7 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Button,
+  Pressable,
 } from 'react-native';
 
 interface ItemProps {
@@ -40,7 +40,7 @@ const AgendaItem = (props: ItemProps) => {
       </View>
       <Text style={styles.itemTitleText}>{item.title}</Text>
       <View style={styles.itemButtonContainer}>
-        <Button color={'grey'} title={'Info'} onPress={buttonPressed} />
+        <Pressable color={'grey'} title={'Info'} onPress={buttonPressed} />
       </View>
     </TouchableOpacity>
   );

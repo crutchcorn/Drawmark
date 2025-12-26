@@ -1,9 +1,10 @@
-import { Svg, Path } from 'react-native-svg';
+import { Svg } from '../Svg';
+import { Path } from 'react-native-svg';
 import { IconProps } from './types';
 
-export function HighlighterIcon({ activeColor }: IconProps) {
+export function HighlighterIcon({ activeColor,...props }: IconProps) {
   return (
-    <Svg viewBox="0 0 480 480" fill="none">
+    <Svg {...props} viewBox="0 0 480 480" fill="none">
       <Path
         d="M200.921 431.791L275.76 356.726L275.76 272.64L200.751 272.64L200.921 431.791Z"
         fill={activeColor}

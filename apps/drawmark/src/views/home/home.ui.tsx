@@ -1,7 +1,7 @@
 import { RefObject } from 'react';
-import { Button, Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import {
-  InkEditor,
+  InkEditor, InkEditorBrushFamily,
   InkEditorBrushInfo,
   InkEditorRef,
 } from '../../components/InkEditor';
@@ -38,8 +38,12 @@ export function HomeUI({
     setIsEditing(!isEditing);
   };
 
+  const setFamily = (family: InkEditorBrushFamily) => setBrushInfo({ ...brushInfo, family });
+
+  const setColor = (color: string) => setBrushInfo({ ...brushInfo, color });
+
   return (
-    <View style={{ flex: 1 }}>
+    <View className="flex-1">
       {isEditing ? (
         <InkEditor
           initialStrokes={initialStrokes}
@@ -54,31 +58,12 @@ export function HomeUI({
         <InkCanvas initialStrokes={initialStrokes} style={{ flex: 1 }} />
       )}
       <Pressable onPress={handleClear}><Text>Clear</Text></Pressable>
-      <View style={{ flexWrap: 'nowrap' }}>
-        <BrushButton />
-        <Pressable
-          onPress={() => setBrushInfo({ ...brushInfo, family: 'pen' })}
-          style={{ height: 30, width: 30 }}
-        >
-          <PenIcon activeColor={brushInfo.color} />
-          {brushInfo.family === 'pen' ? <Text>!</Text> : null}
-        </Pressable>
-        <Pressable
-          onPress={() => setBrushInfo({ ...brushInfo, family: 'marker' })}
-          style={{ height: 30, width: 30 }}
-        >
-          <MarkerIcon activeColor={brushInfo.color} />
-          {brushInfo.family === 'marker' ? <Text>!</Text> : null}
-        </Pressable>
-        <Pressable
-          onPress={() => setBrushInfo({ ...brushInfo, family: 'highlighter' })}
-          style={{ height: 30, width: 30 }}
-        >
-          <HighlighterIcon activeColor={brushInfo.color} />
-          {brushInfo.family === 'highlighter' ? <Text>!</Text> : null}
-        </Pressable>
+      <View className={`flex flex-row space-x-4`}>
+        <BrushButton Icon={PenIcon} family="pen" currentFamily={brushInfo.family} setFamily={setFamily} color={brushInfo.color} setColor={setColor} />
+        <BrushButton Icon={MarkerIcon} family="marker" currentFamily={brushInfo.family} setFamily={setFamily} color={brushInfo.color} setColor={setColor} />
+        <BrushButton Icon={HighlighterIcon} family="highlighter" currentFamily={brushInfo.family} setFamily={setFamily} color={brushInfo.color} setColor={setColor} />
       </View>
-      <View style={{ flexWrap: 'nowrap' }}>
+      <View>
         <Pressable
           onPress={() => setBrushInfo({ ...brushInfo, color: '#FF0000' })}
         ><Text>Red</Text></Pressable>
