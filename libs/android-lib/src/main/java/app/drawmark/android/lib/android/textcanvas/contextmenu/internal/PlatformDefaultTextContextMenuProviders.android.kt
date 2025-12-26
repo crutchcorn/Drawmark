@@ -16,7 +16,6 @@
 
 package app.drawmark.android.lib.textcanvas.contextmenu.internal
 
-import androidx.compose.foundation.internal.checkPreconditionNotNull
 import androidx.compose.foundation.layout.Box
 import app.drawmark.android.lib.textcanvas.contextmenu.provider.LocalTextContextMenuDropdownProvider
 import app.drawmark.android.lib.textcanvas.contextmenu.provider.LocalTextContextMenuToolbarProvider
@@ -64,7 +63,7 @@ private fun ProvideBothDefaultProviders(modifier: Modifier, content: @Composable
     }
 
     val layoutCoordinatesBlock: () -> LayoutCoordinates = remember {
-        { checkPreconditionNotNull(layoutCoordinates) }
+        { layoutCoordinates!! }
     }
 
     val dropdownProvider = defaultTextContextMenuDropdown()

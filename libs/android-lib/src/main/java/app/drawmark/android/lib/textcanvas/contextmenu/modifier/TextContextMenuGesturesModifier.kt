@@ -16,7 +16,6 @@
 
 package app.drawmark.android.lib.textcanvas.contextmenu.modifier
 
-import androidx.compose.foundation.internal.checkPreconditionNotNull
 import app.drawmark.android.lib.textcanvas.contextmenu.data.TextContextMenuData
 import app.drawmark.android.lib.textcanvas.contextmenu.gestures.onRightClickDown
 import app.drawmark.android.lib.textcanvas.contextmenu.provider.LocalTextContextMenuDropdownProvider
@@ -112,7 +111,7 @@ private class TextContextMenuGestureNode(
     private inner class ClickTextContextMenuDataProvider(private val localClickOffset: Offset) :
         TextContextMenuDataProvider {
         override fun position(destinationCoordinates: LayoutCoordinates): Offset {
-            val localCoordinates = checkPreconditionNotNull(localCoordinates) { MESSAGE }
+            val localCoordinates = localCoordinates!!
             return destinationCoordinates.localPositionOf(localCoordinates, localClickOffset)
         }
 

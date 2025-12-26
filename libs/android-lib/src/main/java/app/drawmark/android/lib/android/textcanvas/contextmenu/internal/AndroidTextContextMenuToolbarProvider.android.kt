@@ -29,7 +29,6 @@ import android.view.textclassifier.TextClassification
 import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.MutatorMutex
-import androidx.compose.foundation.internal.checkPreconditionNotNull
 import androidx.compose.foundation.layout.Box
 import app.drawmark.android.lib.textcanvas.contextmenu.data.TextContextMenuData
 import app.drawmark.android.lib.textcanvas.contextmenu.data.TextContextMenuItem
@@ -91,7 +90,7 @@ internal fun ProvidePlatformTextContextMenuToolbar(
 
     val provider =
         platformTextContextMenuToolbarProvider(
-            coordinatesProvider = { checkPreconditionNotNull(layoutCoordinates) },
+            coordinatesProvider = { layoutCoordinates!! },
             callbackInjector = callbackInjector,
         )
 

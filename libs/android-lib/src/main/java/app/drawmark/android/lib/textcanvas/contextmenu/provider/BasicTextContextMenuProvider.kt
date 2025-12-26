@@ -17,7 +17,6 @@
 package app.drawmark.android.lib.textcanvas.contextmenu.provider
 
 import androidx.compose.foundation.MutatorMutex
-import androidx.compose.foundation.internal.checkPreconditionNotNull
 import androidx.compose.foundation.layout.Box
 import app.drawmark.android.lib.textcanvas.contextmenu.data.TextContextMenuSession
 import androidx.compose.runtime.Composable
@@ -90,7 +89,7 @@ internal fun ProvideBasicTextContextMenu(
             modifier = modifier.onGloballyPositioned { layoutCoordinates = it },
         ) {
             content()
-            provider.ContextMenu { checkPreconditionNotNull(layoutCoordinates) }
+            provider.ContextMenu { layoutCoordinates!! }
         }
     }
 }

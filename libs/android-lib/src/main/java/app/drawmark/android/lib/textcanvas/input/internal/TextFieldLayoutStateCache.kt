@@ -16,14 +16,10 @@
 
 package app.drawmark.android.lib.textcanvas.input.internal
 
-import androidx.compose.foundation.internal.checkPreconditionNotNull
 import app.drawmark.android.lib.textcanvas.KeyboardOptions
-import app.drawmark.android.lib.textcanvas.TextDelegate
 import app.drawmark.android.lib.textcanvas.input.PlacedAnnotation
 import app.drawmark.android.lib.textcanvas.input.TextFieldCharSequence
 import app.drawmark.android.lib.textcanvas.input.TextFieldState
-import app.drawmark.android.lib.textcanvas.input.internal.TextFieldLayoutStateCache.MeasureInputs
-import app.drawmark.android.lib.textcanvas.input.internal.TextFieldLayoutStateCache.NonMeasureInputs
 import androidx.compose.runtime.SnapshotMutationPolicy
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -144,9 +140,7 @@ internal class TextFieldLayoutStateCache : State<TextLayoutResult?>, StateObject
             )
         this.measureInputs = measureInputs
         val nonMeasureInputs =
-            checkPreconditionNotNull(nonMeasureInputs) {
-                "Called layoutWithNewMeasureInputs before updateNonMeasureInputs"
-            }
+            nonMeasureInputs!!
         return getOrComputeLayout(nonMeasureInputs, measureInputs)
     }
 

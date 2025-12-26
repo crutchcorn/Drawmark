@@ -28,7 +28,6 @@ import androidx.compose.foundation.gestures.detectTapAndPress
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
-import androidx.compose.foundation.internal.checkPreconditionNotNull
 import androidx.compose.foundation.internal.isAutofillAvailable
 import androidx.compose.foundation.internal.isReadSupported
 import androidx.compose.foundation.internal.isWriteSupported
@@ -1292,9 +1291,7 @@ internal class TextFieldSelectionState(
      */
     private fun getContentRect(): Rect {
         val textLayoutCoordinates =
-            checkPreconditionNotNull(textLayoutCoordinates) {
-                "textLayoutCoordinates should not be null."
-            }
+            textLayoutCoordinates!!
 
         val text = textFieldState.visualText
         // accept cursor position as content rect when selection is collapsed

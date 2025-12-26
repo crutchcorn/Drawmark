@@ -19,8 +19,6 @@ package app.drawmark.android.lib.textcanvas.input.internal
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollBy
-import androidx.compose.foundation.internal.checkPreconditionNotNull
-import app.drawmark.android.lib.textcanvas.BasicTextField
 import app.drawmark.android.lib.textcanvas.contextmenu.modifier.TextContextMenuToolbarHandlerNode
 import app.drawmark.android.lib.textcanvas.contextmenu.modifier.ToolbarRequester
 import app.drawmark.android.lib.textcanvas.contextmenu.modifier.translateRootToDestination
@@ -218,7 +216,7 @@ internal class TextFieldCoreModifierNode(
                     val rootBounds =
                         textFieldSelectionState.derivedVisibleContentBounds ?: Rect.Zero
                     val localCoordinates =
-                        checkPreconditionNotNull(textLayoutState.textLayoutNodeCoordinates)
+                        textLayoutState.textLayoutNodeCoordinates!!
                     translateRootToDestination(
                         rootContentBounds = rootBounds,
                         localCoordinates = localCoordinates,

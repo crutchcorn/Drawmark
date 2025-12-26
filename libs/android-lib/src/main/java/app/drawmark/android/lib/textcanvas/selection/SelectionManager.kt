@@ -29,7 +29,6 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitAllPointersUpWithSlopDetection
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitPrimaryFirstDown
-import androidx.compose.foundation.internal.checkPreconditionNotNull
 import androidx.compose.foundation.internal.requirePrecondition
 import androidx.compose.foundation.internal.requirePreconditionNotNull
 import app.drawmark.android.lib.textcanvas.Handle
@@ -196,7 +195,7 @@ internal class SelectionManager(private val selectionRegistrar: SelectionRegistr
                     computeContentBounds = { destinationCoordinates ->
                         val rootBounds =
                             derivedContentRect ?: return@textContextMenuToolbarHandler null
-                        val localCoordinates = checkPreconditionNotNull(containerLayoutCoordinates)
+                        val localCoordinates = containerLayoutCoordinates!!
                         translateRootToDestination(
                             rootContentBounds = rootBounds,
                             localCoordinates = localCoordinates,
@@ -917,20 +916,12 @@ internal class SelectionManager(private val selectionRegistrar: SelectionRegistr
 
                 val selection = selection!!
                 val anchor = if (isStartHandle) selection.start else selection.end
-                val selectable =
-                    checkPreconditionNotNull(
-                        selectionRegistrar.selectableMap[anchor.selectableId]
-                    ) {
-                        "SelectionRegistrar should contain the current selection's selectableIds"
-                    }
+                val selectable = selectionRegistrar.selectableMap[anchor.selectableId]!!
 
                 // The LayoutCoordinates of the composable where the drag gesture should begin. This
                 // is used to convert the position of the beginning of the drag gesture from the
                 // composable coordinates to selection container coordinates.
-                val beginLayoutCoordinates =
-                    checkPreconditionNotNull(selectable.getLayoutCoordinates()) {
-                        "Current selectable should have layout coordinates."
-                    }
+                val beginLayoutCoordinates = selectable.getLayoutCoordinates()!!
 
                 // The position of the character where the drag gesture should begin. This is in
                 // the composable coordinates.
