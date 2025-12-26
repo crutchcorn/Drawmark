@@ -5,6 +5,7 @@ gson = "2.13.2"
 inkVersion = "1.0.0"
 inputMotionprediction = "1.0.0"
 foundation = "1.10.0"
+emoji2 = "1.6.0"
 
 [libraries]
 androidx-ink-authoring = { module = "androidx.ink:ink-authoring", version.ref = "inkVersion" }
@@ -16,3 +17,4 @@ androidx-ink-brush = { module = "androidx.ink:ink-brush", version.ref = "inkVers
 androidx-input-motionprediction = { module = "androidx.input:input-motionprediction", version.ref = "inputMotionprediction" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 androidx-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+androidx-emoji2 = { group = "androidx.emoji2", name = "emoji2", version.ref = "emoji2" }

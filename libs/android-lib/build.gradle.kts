@@ -66,6 +66,7 @@ dependencies {
     // Gson for JSON serialization
     api(libLocal.gson)
     implementation(libs.androidx.foundation)
+    implementation(libs.androidx.emoji2)
 
     testImplementation(shared.junit)
     androidTestImplementation(shared.androidx.junit)
