@@ -418,7 +418,10 @@ fun CanvasTextField(
                     textLayoutResult?.let { layoutResult ->
                         val textOffset = layoutResult.getOffsetForPosition(offset)
                         state.placeCursor(textOffset)
-                        state.handleState = HandleState.Cursor
+                        // Show cursor handle if text is not empty (matches AndroidX behavior)
+                        if (state.text.isNotEmpty()) {
+                            state.handleState = HandleState.Cursor
+                        }
                     }
                 },
                 onDoubleTap = { offset ->

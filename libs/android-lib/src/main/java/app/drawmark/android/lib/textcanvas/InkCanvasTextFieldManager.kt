@@ -140,6 +140,11 @@ class InkCanvasTextFieldManager {
             tappedTextField.getOffsetForPosition(localPosition)?.let { offset ->
                 tappedTextField.placeCursor(offset)
             }
+            
+            // Show cursor handle if text is not empty (matches AndroidX behavior)
+            if (tappedTextField.text.isNotEmpty()) {
+                tappedTextField.handleState = HandleState.Cursor
+            }
             return true
         } else {
             clearFocus()
@@ -167,6 +172,7 @@ class InkCanvasTextFieldManager {
                 tappedTextField.updateSelection(
                     androidx.compose.ui.text.TextRange(wordBoundary.start, wordBoundary.end)
                 )
+                tappedTextField.handleState = HandleState.Selection
             }
             return true
         }
