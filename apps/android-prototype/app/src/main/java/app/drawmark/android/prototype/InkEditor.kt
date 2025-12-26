@@ -1,9 +1,14 @@
 package app.drawmark.android.prototype
 
 import android.content.Context
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,7 +23,9 @@ import androidx.ink.brush.Brush
 import androidx.ink.brush.StockBrushes
 import androidx.ink.rendering.android.canvas.CanvasStrokeRenderer
 import androidx.ink.strokes.Stroke
+import app.drawmark.android.lib.ink.InkEditorMode
 import app.drawmark.android.lib.ink.InkEditorSurface
+import app.drawmark.android.lib.textcanvas.rememberInkCanvasTextFieldManager
 
 @Composable
 fun InkEditor(
@@ -37,6 +44,12 @@ fun InkEditor(
     val brushFamily = remember { mutableStateOf(StockBrushes.pressurePen()) }
     val brushColor = remember { mutableStateOf(Color.Black.toArgb()) }
     val brushSize = remember { mutableStateOf(5f) }
+
+    // Editor mode state (Draw or Text)
+    val editorMode = remember { mutableStateOf(InkEditorMode.Draw) }
+
+    // Text field manager for text mode
+    val textFieldManager = rememberInkCanvasTextFieldManager()
 
     val getBrush: () -> Brush = {
         Brush.createWithColorIntArgb(
@@ -72,7 +85,36 @@ fun InkEditor(
             finishedStrokesState = finishedStrokesState.value,
             canvasStrokeRenderer = canvasStrokeRenderer,
             getBrush = getBrush,
+            mode = editorMode.value,
+            textFieldManager = textFieldManager,
         )
+
+        // Mode toggle buttons at the top
+        Row(
+            modifier = Modifier
+                .align(androidx.compose.ui.Alignment.TopCenter)
+                .padding(top = 16.dp)
+                .background(Color.White.copy(alpha = 0.9f), shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+                .padding(8.dp)
+        ) {
+            Button(
+                onClick = { editorMode.value = InkEditorMode.Draw },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (editorMode.value == InkEditorMode.Draw) Color.Blue else Color.Gray
+                ),
+                modifier = Modifier.padding(end = 8.dp)
+            ) {
+                Text("✏️ Draw", color = Color.White)
+            }
+            Button(
+                onClick = { editorMode.value = InkEditorMode.Text },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (editorMode.value == InkEditorMode.Text) Color.Blue else Color.Gray
+                )
+            ) {
+                Text("📝 Text", color = Color.White)
+            }
+        }
 
         Box(
             modifier = Modifier

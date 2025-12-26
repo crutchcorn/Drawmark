@@ -2,12 +2,23 @@ package app.drawmark.android.lib.ink
 
 import android.graphics.Matrix
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.sp
 import androidx.ink.rendering.android.canvas.CanvasStrokeRenderer
 import androidx.ink.strokes.Stroke
+import app.drawmark.android.lib.textcanvas.CanvasTextField
+import app.drawmark.android.lib.textcanvas.InkCanvasTextFieldManager
+import kotlin.math.roundToInt
 
 // TODO: This composable was originally meant to handle displaying our contents for us, but now I'm
 //   wondering if we should use this instead:
@@ -29,6 +40,93 @@ fun InkDisplaySurface(
                 canvas = canvas,
                 strokeToScreenTransform = canvasTransform
             )
+        }
+    }
+}
+
+/**
+ * Enhanced display surface that renders both strokes and text fields.
+ */
+@Composable
+fun InkDisplaySurfaceWithText(
+    finishedStrokesState: Set<Stroke>,
+    canvasStrokeRenderer: CanvasStrokeRenderer,
+    textFieldManager: InkCanvasTextFieldManager?,
+    isTextMode: Boolean = false,
+    cursorColor: Color = Color.Black,
+    selectionColor: Color = Color.Blue.copy(alpha = 0.4f)
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        val canvasModifier = if (isTextMode && textFieldManager != null) {
+            Modifier
+                .fillMaxSize()
+                .pointerInput(textFieldManager) {
+                    detectTapGestures(
+                        onTap = { position ->
+                            // First try to tap an existing text field
+                            if (!textFieldManager.handleTap(position)) {
+                                // No text field was tapped - create a new one
+                                val newTextField = textFieldManager.addTextField(position, "")
+                                textFieldManager.requestFocus(newTextField)
+                            }
+                        },
+                        onDoubleTap = { position ->
+                            textFieldManager.handleDoubleTap(position)
+                        },
+                        onLongPress = { position ->
+                            textFieldManager.handleLongPress(position)
+                        }
+                    )
+                }
+        } else {
+            Modifier.fillMaxSize()
+        }
+
+        // Canvas for strokes and text field visuals
+        Canvas(modifier = canvasModifier) {
+            val canvasTransform = Matrix()
+            drawContext.canvas.nativeCanvas.concat(canvasTransform)
+            val canvas = drawContext.canvas.nativeCanvas
+
+            // Draw strokes first
+            finishedStrokesState.forEach { stroke ->
+                canvasStrokeRenderer.draw(
+                    stroke = stroke,
+                    canvas = canvas,
+                    strokeToScreenTransform = canvasTransform
+                )
+            }
+
+            // Draw text fields on top (visual rendering only)
+            textFieldManager?.draw(
+                canvas = drawContext.canvas,
+                cursorColor = cursorColor,
+                selectionColor = selectionColor
+            )
+        }
+
+        // Overlay actual CanvasTextField composables for focus/keyboard handling
+        if (isTextMode && textFieldManager != null) {
+            textFieldManager.textFields.forEach { textFieldState ->
+                CanvasTextField(
+                    state = textFieldState,
+                    onValueChange = { newValue ->
+                        textFieldState.updateValue(newValue)
+                    },
+                    modifier = Modifier.offset {
+                        IntOffset(
+                            textFieldState.position.x.roundToInt(),
+                            textFieldState.position.y.roundToInt()
+                        )
+                    },
+                    textStyle = TextStyle(
+                        fontSize = 16.sp,
+                        color = Color.Black
+                    ),
+                    cursorColor = cursorColor,
+                    selectionColor = selectionColor
+                )
+            }
         }
     }
 }
