@@ -47,46 +47,54 @@ export function useToolbarStatePersistence(canvasId: string) {
     [canvasId, queryClient, saveStateMutation],
   );
 
+  // Helper to get current state from cache (avoids stale closure issues)
+  const getCurrentState = useCallback((): ToolbarState => {
+    return (
+      queryClient.getQueryData<ToolbarState>([QUERY_KEY_PREFIX, canvasId]) ??
+      DEFAULT_TOOLBAR_STATE
+    );
+  }, [canvasId, queryClient]);
+
   // Helper to update active brush family
   const setActiveFamily = useCallback(
     (family: InkEditorBrushFamily) => {
-      if (!toolbarState) return;
-      persistState({ ...toolbarState, activeFamily: family });
+      const currentState = getCurrentState();
+      persistState({ ...currentState, activeFamily: family });
     },
-    [toolbarState, persistState],
+    [getCurrentState, persistState],
   );
 
   // Helper to update editing mode
   const setEditingMode = useCallback(
     (mode: InkEditorMode) => {
-      if (!toolbarState) return;
-      persistState({ ...toolbarState, editingMode: mode });
+      const currentState = getCurrentState();
+      persistState({ ...currentState, editingMode: mode });
     },
-    [toolbarState, persistState],
+    [getCurrentState, persistState],
   );
 
   // Helper to update settings for a specific brush family
   const setBrushSettings = useCallback(
     (family: InkEditorBrushFamily, settings: Partial<BrushSettings>) => {
-      if (!toolbarState) return;
+      const currentState = getCurrentState();
       persistState({
-        ...toolbarState,
+        ...currentState,
         brushes: {
-          ...toolbarState.brushes,
-          [family]: { ...toolbarState.brushes[family], ...settings },
+          ...currentState.brushes,
+          [family]: { ...currentState.brushes[family], ...settings },
         },
       });
     },
-    [toolbarState, persistState],
+    [getCurrentState, persistState],
   );
 
   // Helper to update color for the currently active brush
   const setActiveBrushColor = useCallback(
     (color: string) => {
-      if (!toolbarState) return;
-      setBrushSettings(toolbarState.activeFamily, { color });
+      const currentState = getCurrentState();
+      setBrushSettings(currentState.activeFamily, { color });
     },
-    [toolbarState, setBrushSettings],
+    [getCurrentState, setBrushSettings],
   );
 
   // Get current active brush info (for the InkEditor component)
