@@ -89,7 +89,7 @@ export function BrushButton({
           <Icon
             activeColor={color}
             // Lift the icon by 10px when selected
-            className={`mt-4 mb-4 h-12 w-12 ${isSelected ? '-translate-y-1' : ''}`}
+            className={`will-change-variable mt-4 mb-4 h-12 w-12 ${isSelected ? '-translate-y-1' : ''}`}
           />
           {isSelected ? (
             <Text className="absolute -bottom-4 left-1/2 -translate-x-1/2 transform text-6xl">
