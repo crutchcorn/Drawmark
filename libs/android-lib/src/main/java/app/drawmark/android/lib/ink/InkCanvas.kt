@@ -169,7 +169,7 @@ fun InkDisplaySurfaceWithText(
             // Determine which strokes to render
             val strokeElements: List<CanvasElement> = if (strokesWithZIndex.isNotEmpty()) {
                 // Use strokes with z-index for proper ordering
-                strokesWithZIndex.map { CanvasElement.StrokeElement(it.stroke, it.zIndex) }
+                strokesWithZIndex.map { CanvasElement.StrokeElement(it.stroke, it.zIndex, it.lastModified) }
             } else {
                 // Legacy mode: render all strokes at z-index 0
                 finishedStrokesState.map { CanvasElement.StrokeElement(it, 0L) }
@@ -177,11 +177,13 @@ fun InkDisplaySurfaceWithText(
 
             // Create text field elements
             val textFieldElements: List<CanvasElement> = textFieldManager?.textFields?.map { textField ->
-                CanvasElement.TextFieldElement(textField, textField.zIndex)
+                CanvasElement.TextFieldElement(textField, textField.zIndex, textField.lastModified)
             } ?: emptyList()
 
-            // Combine and sort all elements by z-index
-            val allElements = (strokeElements + textFieldElements).sortedBy { it.zIndex }
+            // Combine and sort all elements by z-index, then by lastModified for elements with same z-index
+            val allElements = (strokeElements + textFieldElements).sortedWith(
+                compareBy({ it.zIndex }, { it.lastModified })
+            )
 
             // Render elements in z-order
             allElements.forEach { element ->

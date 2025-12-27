@@ -18,15 +18,17 @@ import com.google.gson.reflect.TypeToken
 data class SerializedStroke(
     val inputs: SerializedStrokeInputBatch,
     val brush: SerializedBrush,
-    val zIndex: Long = 0L
+    val zIndex: Long = 0L,
+    val lastModified: Long = 0L
 )
 
 /**
- * A stroke with its z-index for proper ordering with other canvas elements.
+ * A stroke with its z-index and lastModified timestamp for proper ordering with other canvas elements.
  */
 data class StrokeWithZIndex(
     val stroke: Stroke,
-    val zIndex: Long
+    val zIndex: Long,
+    val lastModified: Long = System.currentTimeMillis()
 )
 
 /**
@@ -128,7 +130,8 @@ class StrokeSerializer {
             SerializedStroke(
                 inputs = serializeStrokeInputBatch(strokeWithZIndex.stroke.inputs),
                 brush = serializeBrush(strokeWithZIndex.stroke.brush),
-                zIndex = strokeWithZIndex.zIndex
+                zIndex = strokeWithZIndex.zIndex,
+                lastModified = strokeWithZIndex.lastModified
             )
         }
         return gson.toJson(serializedStrokes)
@@ -161,7 +164,7 @@ class StrokeSerializer {
             val serializedStrokes: List<SerializedStroke> = gson.fromJson(json, type)
             serializedStrokes.mapNotNull { serialized ->
                 deserializeStroke(serialized)?.let { stroke ->
-                    StrokeWithZIndex(stroke, serialized.zIndex)
+                    StrokeWithZIndex(stroke, serialized.zIndex, serialized.lastModified)
                 }
             }
         } catch (e: Exception) {

@@ -20,12 +20,14 @@ import androidx.compose.ui.text.input.TextFieldValue
  * @param initialValue The initial text field value
  * @param initialPosition The initial position on the canvas (top-left corner)
  * @param initialZIndex The initial z-index for ordering with other canvas elements
+ * @param initialLastModified The initial lastModified timestamp for ordering elements with same z-index
  */
 @Stable
 class CanvasTextFieldState(
     initialValue: TextFieldValue = TextFieldValue(),
     initialPosition: Offset = Offset.Zero,
-    initialZIndex: Long = 0L
+    initialZIndex: Long = 0L,
+    initialLastModified: Long = System.currentTimeMillis()
 ) {
     // ============ Z-Index State ============
 
@@ -34,6 +36,13 @@ class CanvasTextFieldState(
      * Higher values are drawn on top of lower values.
      */
     var zIndex: Long = initialZIndex
+
+    /**
+     * Timestamp of when this text field was last modified.
+     * Used as a secondary sort key when elements have the same zIndex.
+     * Higher values (more recent) are drawn on top.
+     */
+    var lastModified: Long = initialLastModified
 
     // ============ Text Content State ============
 
@@ -713,12 +722,19 @@ class CanvasTextFieldState(
          * @param text The initial text content
          * @param position The initial position on the canvas
          * @param zIndex The z-index for ordering with other canvas elements
+         * @param lastModified The lastModified timestamp for ordering elements with same z-index
          */
-        fun withText(text: String, position: Offset = Offset.Zero, zIndex: Long = 0L): CanvasTextFieldState {
+        fun withText(
+            text: String,
+            position: Offset = Offset.Zero,
+            zIndex: Long = 0L,
+            lastModified: Long = System.currentTimeMillis()
+        ): CanvasTextFieldState {
             return CanvasTextFieldState(
                 initialValue = TextFieldValue(text = text, selection = TextRange(text.length)),
                 initialPosition = position,
-                initialZIndex = zIndex
+                initialZIndex = zIndex,
+                initialLastModified = lastModified
             )
         }
     }

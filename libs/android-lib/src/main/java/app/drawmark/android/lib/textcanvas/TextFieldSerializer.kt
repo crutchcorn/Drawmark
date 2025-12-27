@@ -12,7 +12,8 @@ data class SerializedTextField(
     val text: String,
     val positionX: Float,
     val positionY: Float,
-    val zIndex: Long = 0L
+    val zIndex: Long = 0L,
+    val lastModified: Long = 0L
 )
 
 /**
@@ -31,7 +32,8 @@ class TextFieldSerializer {
                 text = state.text,
                 positionX = state.position.x,
                 positionY = state.position.y,
-                zIndex = state.zIndex
+                zIndex = state.zIndex,
+                lastModified = state.lastModified
             )
         }
         return gson.toJson(serializedTextFields)
@@ -50,7 +52,8 @@ class TextFieldSerializer {
                 CanvasTextFieldState.withText(
                     text = serialized.text,
                     position = Offset(serialized.positionX, serialized.positionY),
-                    zIndex = serialized.zIndex
+                    zIndex = serialized.zIndex,
+                    lastModified = serialized.lastModified
                 )
             }
         } catch (e: Exception) {

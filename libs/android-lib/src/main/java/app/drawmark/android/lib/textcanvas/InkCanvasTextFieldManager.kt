@@ -84,14 +84,16 @@ class InkCanvasTextFieldManager {
      * @param position The canvas position for the text field
      * @param initialText Initial text content
      * @param zIndex The z-index for ordering with other canvas elements (default: 0)
+     * @param lastModified The lastModified timestamp for ordering elements with same z-index
      * @return The created text field state
      */
     fun addTextField(
         position: Offset,
         initialText: String = "",
-        zIndex: Long = 0L
+        zIndex: Long = 0L,
+        lastModified: Long = System.currentTimeMillis()
     ): CanvasTextFieldState {
-        val state = CanvasTextFieldState.withText(initialText, position, zIndex)
+        val state = CanvasTextFieldState.withText(initialText, position, zIndex, lastModified)
         setupTextChangeCallback(state)
         textFields.add(state)
         notifyTextFieldsChanged()

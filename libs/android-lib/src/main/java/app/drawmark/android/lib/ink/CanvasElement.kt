@@ -9,6 +9,10 @@ import app.drawmark.android.lib.textcanvas.CanvasTextFieldState
  * This sealed class allows strokes and text fields to be rendered
  * in their creation order, ensuring proper visual layering where
  * elements drawn later appear on top of elements drawn earlier.
+ * 
+ * Elements are sorted by zIndex first, then by lastModified for elements
+ * with the same zIndex. This allows manual z-index assignment while
+ * maintaining predictable ordering.
  */
 sealed class CanvasElement {
     /**
@@ -18,11 +22,19 @@ sealed class CanvasElement {
     abstract val zIndex: Long
 
     /**
+     * Timestamp of when this element was last modified.
+     * Used as a secondary sort key when elements have the same zIndex.
+     * Higher values (more recent) are drawn on top.
+     */
+    abstract val lastModified: Long
+
+    /**
      * A stroke element on the canvas.
      */
     data class StrokeElement(
         val stroke: Stroke,
-        override val zIndex: Long
+        override val zIndex: Long,
+        override val lastModified: Long = System.currentTimeMillis()
     ) : CanvasElement()
 
     /**
@@ -30,7 +42,8 @@ sealed class CanvasElement {
      */
     data class TextFieldElement(
         val textField: CanvasTextFieldState,
-        override val zIndex: Long
+        override val zIndex: Long,
+        override val lastModified: Long = System.currentTimeMillis()
     ) : CanvasElement()
 }
 
