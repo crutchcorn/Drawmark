@@ -1,5 +1,5 @@
 ---
-applyTo: 'src/**/*'
+applyTo: 'apps/drawmark/src/**/*'
 ---
 
 This project is using React Native with TypeScript. Please follow the instructions below to set up your development environment and get started with the project.
