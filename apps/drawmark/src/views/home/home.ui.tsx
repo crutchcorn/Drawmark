@@ -69,6 +69,7 @@ export function HomeUI({
           brushColor={activeBrushInfo.color}
           brushSize={activeBrushInfo.size}
           brushFamily={activeBrushInfo.family}
+          brushOpacity={activeBrushInfo.opacity}
           mode={toolbarState.editingMode}
           style={{ flex: 1 }}
         />

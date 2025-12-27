@@ -93,6 +93,11 @@ class InkEditorViewManager(
         textFieldsJson?.let { view.loadTextFields(it) }
     }
 
+    @ReactProp(name = "brushOpacity", defaultFloat = 1f)
+    fun setBrushOpacity(view: InkEditorView, opacity: Float) {
+        view.setBrushOpacity(opacity)
+    }
+
     override fun getCommandsMap(): Map<String, Int> {
         return mapOf(
             "clear" to COMMAND_CLEAR

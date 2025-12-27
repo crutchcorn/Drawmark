@@ -2,7 +2,7 @@ import * as v from 'valibot';
 import { Colors } from '../views/home/constants/colors';
 
 /**
- * Schema for a single brush family settings (pen, marker, or highlighter)
+ * Schema for a single brush family settings (pen or marker)
  */
 export const BrushSettingsSchema = v.object({
   color: v.string(),
@@ -10,6 +10,17 @@ export const BrushSettingsSchema = v.object({
 });
 
 export type BrushSettings = v.InferOutput<typeof BrushSettingsSchema>;
+
+/**
+ * Schema for highlighter brush settings (includes opacity)
+ */
+export const HighlighterBrushSettingsSchema = v.object({
+  color: v.string(),
+  size: v.number(),
+  opacity: v.fallback(v.number(), 0.5),
+});
+
+export type HighlighterBrushSettings = v.InferOutput<typeof HighlighterBrushSettingsSchema>;
 
 /**
  * Schema for full toolbar state with per-brush settings and defaults
@@ -24,15 +35,16 @@ export const ToolbarStateSchema = v.object({
     v.object({
       pen: v.fallback(BrushSettingsSchema, { color: Colors.blue, size: 8 }),
       marker: v.fallback(BrushSettingsSchema, { color: Colors.red, size: 12 }),
-      highlighter: v.fallback(BrushSettingsSchema, {
+      highlighter: v.fallback(HighlighterBrushSettingsSchema, {
         color: Colors.yellow,
         size: 24,
+        opacity: 0.5,
       }),
     }),
     {
       pen: { color: Colors.blue, size: 8 },
       marker: { color: Colors.red, size: 12 },
-      highlighter: { color: Colors.yellow, size: 24 },
+      highlighter: { color: Colors.yellow, size: 24, opacity: 0.5 },
     },
   ),
 });

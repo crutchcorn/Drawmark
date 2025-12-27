@@ -25,6 +25,7 @@ interface InkEditorNativeProps {
   brushColor?: string;
   brushSize?: number;
   brushFamily?: 'pen' | 'marker' | 'highlighter';
+  brushOpacity?: number;
   mode?: 'draw' | 'text';
   strokes?: string;
   textFields?: string;
@@ -46,6 +47,7 @@ export interface InkEditorBrushInfo {
   color: string;
   size: number;
   family: InkEditorBrushFamily;
+  opacity?: number;
 }
 
 export interface InkEditorProps {
@@ -68,6 +70,12 @@ export interface InkEditorProps {
    * @default "pen"
    */
   brushFamily?: InkEditorBrushFamily;
+  /**
+   * The opacity of the brush stroke (0.0 to 1.0).
+   * Currently only applies to the highlighter brush.
+   * @default 1.0 (or 0.5 for highlighter)
+   */
+  brushOpacity?: number;
   /**
    * The editor mode.
    * - "draw": Drawing mode - touch creates ink strokes (default)
@@ -116,6 +124,7 @@ export const InkEditor = forwardRef<InkEditorRef, InkEditorProps>(
       brushColor = '#000000',
       brushSize = 5,
       brushFamily = 'pen',
+      brushOpacity,
       mode = 'draw',
       strokes,
       textFields,
@@ -170,6 +179,7 @@ export const InkEditor = forwardRef<InkEditorRef, InkEditorProps>(
         brushColor={brushColor}
         brushSize={brushSize}
         brushFamily={brushFamily}
+        brushOpacity={brushOpacity}
         mode={mode ?? undefined}
         strokes={strokes}
         textFields={textFields}

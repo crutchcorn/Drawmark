@@ -103,6 +103,9 @@ export function useToolbarStatePersistence(canvasId: string) {
         family: toolbarState.activeFamily,
         color: toolbarState.brushes[toolbarState.activeFamily].color,
         size: toolbarState.brushes[toolbarState.activeFamily].size,
+        opacity: toolbarState.activeFamily === 'highlighter' 
+          ? toolbarState.brushes.highlighter.opacity 
+          : undefined,
       }
     : null;
 

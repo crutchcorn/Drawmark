@@ -41,6 +41,7 @@ class InkEditorView(context: Context) : FrameLayout(context), InProgressStrokesF
     private var brushColorState = mutableStateOf(Color.Black.toArgb())
     private var brushSizeState = mutableStateOf(5f)
     private var brushFamilyState = mutableStateOf(StockBrushes.pressurePen())
+    private var brushOpacityState = mutableStateOf(1f)
     
     // Editor mode - Draw or Text
     private var editorModeState = mutableStateOf(InkEditorMode.Draw)
@@ -71,6 +72,7 @@ class InkEditorView(context: Context) : FrameLayout(context), InProgressStrokesF
             val currentBrushColor = brushColorState.value
             val currentBrushSize = brushSizeState.value
             val currentBrushFamily = brushFamilyState.value
+            val currentBrushOpacity = brushOpacityState.value
             val currentMode = editorModeState.value
 
             InkEditorSurface(
@@ -78,9 +80,12 @@ class InkEditorView(context: Context) : FrameLayout(context), InProgressStrokesF
                 finishedStrokesState = finishedStrokesState.value,
                 canvasStrokeRenderer = canvasStrokeRenderer,
                 getBrush = {
+                    // Apply opacity by modifying the alpha channel of the color
+                    val alpha = (currentBrushOpacity * 255).toInt().coerceIn(0, 255)
+                    val colorWithOpacity = (currentBrushColor and 0x00FFFFFF) or (alpha shl 24)
                     Brush.createWithColorIntArgb(
                         family = currentBrushFamily,
-                        colorIntArgb = currentBrushColor,
+                        colorIntArgb = colorWithOpacity,
                         size = currentBrushSize,
                         epsilon = 0.1f
                     )
@@ -151,6 +156,14 @@ class InkEditorView(context: Context) : FrameLayout(context), InProgressStrokesF
             "highlighter" -> StockBrushes.highlighter()
             else -> StockBrushes.pressurePen()
         }
+    }
+
+    /**
+     * Sets the brush opacity (0.0 to 1.0).
+     * This affects the alpha channel of the brush color.
+     */
+    fun setBrushOpacity(opacity: Float) {
+        brushOpacityState.value = opacity.coerceIn(0f, 1f)
     }
 
     /**
