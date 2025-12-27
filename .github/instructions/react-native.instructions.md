@@ -13,6 +13,7 @@ This project is using React Native with TypeScript. Please follow the instructio
 - Use Drizzle ORM for database interactions.
 - Use React Navigation for navigation.
 - Never use the built-in `Button` component
+- While making DB schema files is important, never manually make `Drizzle` migration files (including the `_journal.json` file). Instead, use `pnpm gen:db` to generate migration files automatically.
 
 ## Folder structure
 
