@@ -1,0 +1,1 @@
+ALTER TABLE `ink_canvas_state` ADD `text_fields_json` text DEFAULT '[]' NOT NULL;

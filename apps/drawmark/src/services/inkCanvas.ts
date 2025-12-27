@@ -6,6 +6,7 @@ export interface InkCanvasState {
   id: number;
   canvasId: string;
   strokesJson: string;
+  textFieldsJson: string;
   updatedAt: Date;
 }
 
@@ -37,6 +38,43 @@ export async function saveInkCanvasState(
   db: DB,
   canvasId: string,
   strokesJson: string,
+  textFieldsJson?: string,
+): Promise<void> {
+  const existing = await getInkCanvasState(db, canvasId);
+
+  if (existing) {
+    const updateData: {
+      strokesJson: string;
+      textFieldsJson?: string;
+      updatedAt: Date;
+    } = {
+      strokesJson,
+      updatedAt: new Date(),
+    };
+    if (textFieldsJson !== undefined) {
+      updateData.textFieldsJson = textFieldsJson;
+    }
+    await db
+      .update(inkCanvasStateTable)
+      .set(updateData)
+      .where(eq(inkCanvasStateTable.canvasId, canvasId));
+  } else {
+    await db.insert(inkCanvasStateTable).values({
+      canvasId,
+      strokesJson,
+      textFieldsJson: textFieldsJson ?? '[]',
+      updatedAt: new Date(),
+    });
+  }
+}
+
+/**
+ * Saves only the text fields for a given canvas ID.
+ */
+export async function saveTextFieldsState(
+  db: DB,
+  canvasId: string,
+  textFieldsJson: string,
 ): Promise<void> {
   const existing = await getInkCanvasState(db, canvasId);
 
@@ -44,14 +82,15 @@ export async function saveInkCanvasState(
     await db
       .update(inkCanvasStateTable)
       .set({
-        strokesJson,
+        textFieldsJson,
         updatedAt: new Date(),
       })
       .where(eq(inkCanvasStateTable.canvasId, canvasId));
   } else {
     await db.insert(inkCanvasStateTable).values({
       canvasId,
-      strokesJson,
+      strokesJson: '[]',
+      textFieldsJson,
       updatedAt: new Date(),
     });
   }

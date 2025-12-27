@@ -17,7 +17,7 @@ import androidx.ink.strokes.Stroke
 import app.drawmark.android.lib.ink.InkEditorMode
 import app.drawmark.android.lib.ink.InkEditorSurface
 import app.drawmark.android.lib.ink.StrokeSerializer
-import app.drawmark.android.lib.textcanvas.rememberInkCanvasTextFieldManager
+import app.drawmark.android.lib.textcanvas.InkCanvasTextFieldManager
 import kotlin.collections.plus
 
 
@@ -28,9 +28,15 @@ class InkEditorView(context: Context) : FrameLayout(context), InProgressStrokesF
     private val finishedStrokesState = mutableStateOf(emptySet<Stroke>())
     private val canvasStrokeRenderer = CanvasStrokeRenderer.create()
     private val strokeSerializer = StrokeSerializer()
+    
+    // Text field manager - held at view level for serialization access
+    private val textFieldManager = InkCanvasTextFieldManager()
 
     // Callback for stroke changes
     var onStrokesChange: ((String) -> Unit)? = null
+    
+    // Callback for text field changes
+    var onTextFieldsChange: ((String) -> Unit)? = null
 
     // Brush configuration - using mutableStateOf for reactive updates from React Native
     private var brushColorState = mutableStateOf(Color.Black.toArgb())
@@ -42,6 +48,11 @@ class InkEditorView(context: Context) : FrameLayout(context), InProgressStrokesF
 
     init {
         inProgressStrokesView.addFinishedStrokesListener(this)
+        
+        // Set up text field change callback
+        textFieldManager.onTextFieldsChange = {
+            notifyTextFieldsChanged()
+        }
 
         val composeView = ComposeView(context).apply {
             setContent {
@@ -50,9 +61,6 @@ class InkEditorView(context: Context) : FrameLayout(context), InProgressStrokesF
                 val currentBrushSize = brushSizeState.value
                 val currentBrushFamily = brushFamilyState.value
                 val currentMode = editorModeState.value
-                
-                // Text field manager for text mode
-                val textFieldManager = rememberInkCanvasTextFieldManager()
                 
                 InkEditorSurface(
                     inProgressStrokesView = inProgressStrokesView,
@@ -126,7 +134,9 @@ class InkEditorView(context: Context) : FrameLayout(context), InProgressStrokesF
      */
     fun clearCanvas() {
         finishedStrokesState.value = emptySet()
+        textFieldManager.clearTextFields()
         notifyStrokesChanged()
+        notifyTextFieldsChanged()
     }
 
     /**
@@ -146,11 +156,34 @@ class InkEditorView(context: Context) : FrameLayout(context), InProgressStrokesF
     }
 
     /**
+     * Loads text fields from a serialized JSON string.
+     */
+    fun loadTextFields(json: String) {
+        if (json.isEmpty()) return
+        textFieldManager.loadTextFields(json)
+    }
+
+    /**
+     * Gets the current text fields as a serialized JSON string.
+     */
+    fun getSerializedTextFields(): String {
+        return textFieldManager.serializeTextFields()
+    }
+
+    /**
      * Notifies the listener that strokes have changed.
      */
     private fun notifyStrokesChanged() {
         val serialized = strokeSerializer.serializeStrokes(finishedStrokesState.value)
         onStrokesChange?.invoke(serialized)
+    }
+
+    /**
+     * Notifies the listener that text fields have changed.
+     */
+    private fun notifyTextFieldsChanged() {
+        val serialized = textFieldManager.serializeTextFields()
+        onTextFieldsChange?.invoke(serialized)
     }
 
     override fun onStrokesFinished(strokes: Map<InProgressStrokeId, Stroke>) {

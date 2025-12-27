@@ -21,6 +21,7 @@ class InkEditorViewManager(
         const val REACT_CLASS = "InkEditorView"
         const val COMMAND_CLEAR = 1
         const val COMMAND_LOAD_STROKES = 2
+        const val COMMAND_LOAD_TEXT_FIELDS = 3
     }
 
     override fun getName(): String = REACT_CLASS
@@ -37,12 +38,22 @@ class InkEditorViewManager(
                 .receiveEvent(view.id, "onStrokesChange", event)
         }
         
+        // Set up the text fields change callback to emit events to React Native
+        view.onTextFieldsChange = { serializedTextFields ->
+            val event = Arguments.createMap().apply {
+                putString("textFields", serializedTextFields)
+            }
+            context.getJSModule(RCTEventEmitter::class.java)
+                .receiveEvent(view.id, "onTextFieldsChange", event)
+        }
+        
         return view
     }
 
     override fun getExportedCustomDirectEventTypeConstants(): Map<String, Any>? {
         return MapBuilder.builder<String, Any>()
             .put("onStrokesChange", MapBuilder.of("registrationName", "onStrokesChange"))
+            .put("onTextFieldsChange", MapBuilder.of("registrationName", "onTextFieldsChange"))
             .build()
     }
 
@@ -80,7 +91,8 @@ class InkEditorViewManager(
     override fun getCommandsMap(): Map<String, Int> {
         return mapOf(
             "clear" to COMMAND_CLEAR,
-            "loadStrokes" to COMMAND_LOAD_STROKES
+            "loadStrokes" to COMMAND_LOAD_STROKES,
+            "loadTextFields" to COMMAND_LOAD_TEXT_FIELDS
         )
     }
 
@@ -90,6 +102,10 @@ class InkEditorViewManager(
             "loadStrokes" -> {
                 val strokesJson = args?.getString(0) ?: ""
                 view.loadStrokes(strokesJson)
+            }
+            "loadTextFields" -> {
+                val textFieldsJson = args?.getString(0) ?: ""
+                view.loadTextFields(textFieldsJson)
             }
         }
     }
@@ -101,6 +117,10 @@ class InkEditorViewManager(
             COMMAND_LOAD_STROKES -> {
                 val strokesJson = args?.getString(0) ?: ""
                 view.loadStrokes(strokesJson)
+            }
+            COMMAND_LOAD_TEXT_FIELDS -> {
+                val textFieldsJson = args?.getString(0) ?: ""
+                view.loadTextFields(textFieldsJson)
             }
         }
     }

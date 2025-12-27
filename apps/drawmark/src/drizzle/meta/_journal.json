@@ -15,6 +15,13 @@
       "when": 1765959010136,
       "tag": "0001_chilly_ego",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1766848561173,
+      "tag": "0002_old_mad_thinker",
+      "breakpoints": true
     }
   ]
 }

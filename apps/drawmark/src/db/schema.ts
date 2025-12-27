@@ -11,6 +11,8 @@ export const inkCanvasStateTable = sqliteTable('ink_canvas_state', {
   canvasId: text('canvas_id').notNull().unique(),
   /** Serialized strokes JSON string from Android Ink API */
   strokesJson: text('strokes_json').notNull().default('[]'),
+  /** Serialized text fields JSON string */
+  textFieldsJson: text('text_fields_json').notNull().default('[]'),
   /** Timestamp of last update */
   updatedAt: int('updated_at', { mode: 'timestamp' }).notNull(),
 });

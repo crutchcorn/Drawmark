@@ -51,6 +51,18 @@ class InkCanvasTextFieldManager {
         get() = focusedTextField != null
 
     /**
+     * Callback for when text fields change.
+     */
+    var onTextFieldsChange: (() -> Unit)? = null
+
+    /**
+     * Notify that text fields have changed.
+     */
+    private fun notifyTextFieldsChanged() {
+        onTextFieldsChange?.invoke()
+    }
+
+    /**
      * Add a new text field at the specified position.
      *
      * @param position The canvas position for the text field
@@ -63,6 +75,7 @@ class InkCanvasTextFieldManager {
     ): CanvasTextFieldState {
         val state = CanvasTextFieldState.withText(initialText, position)
         textFields.add(state)
+        notifyTextFieldsChanged()
         return state
     }
 
@@ -76,7 +89,11 @@ class InkCanvasTextFieldManager {
         if (focusedTextField == state) {
             focusedTextField = null
         }
-        return textFields.remove(state)
+        val removed = textFields.remove(state)
+        if (removed) {
+            notifyTextFieldsChanged()
+        }
+        return removed
     }
 
     /**
@@ -85,6 +102,7 @@ class InkCanvasTextFieldManager {
     fun clearTextFields() {
         focusedTextField = null
         textFields.clear()
+        notifyTextFieldsChanged()
     }
 
     /**
@@ -106,12 +124,19 @@ class InkCanvasTextFieldManager {
      * @param state The text field to focus, or null to clear focus
      */
     fun requestFocus(state: CanvasTextFieldState?) {
+        val previousFocusedTextField = focusedTextField
+        
         // Clear previous focus request
-        focusedTextField?.focusRequested = false
+        previousFocusedTextField?.focusRequested = false
 
         // Set new focus
         focusedTextField = state
         state?.focusRequested = true
+        
+        // Notify changes when focus changes (user finished editing previous text field)
+        if (previousFocusedTextField != null && previousFocusedTextField != state) {
+            notifyTextFieldsChanged()
+        }
     }
 
     /**
@@ -445,6 +470,33 @@ class InkCanvasTextFieldManager {
                 )
             }
         }
+    }
+
+    // ============ Serialization ============
+
+    private val textFieldSerializer = TextFieldSerializer()
+
+    /**
+     * Serializes all text fields to a JSON string for persistent storage.
+     *
+     * @return JSON string representation of all text fields
+     */
+    fun serializeTextFields(): String {
+        return textFieldSerializer.serializeTextFields(textFields.toList())
+    }
+
+    /**
+     * Loads text fields from a serialized JSON string.
+     * This will clear any existing text fields before loading.
+     *
+     * @param json The JSON string to deserialize
+     */
+    fun loadTextFields(json: String) {
+        if (json.isBlank()) return
+        
+        clearTextFields()
+        val deserializedTextFields = textFieldSerializer.deserializeTextFields(json)
+        textFields.addAll(deserializedTextFields)
     }
 }
 

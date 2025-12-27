@@ -21,6 +21,10 @@ interface StrokesChangeEvent {
   strokes: string;
 }
 
+interface TextFieldsChangeEvent {
+  textFields: string;
+}
+
 interface InkEditorNativeProps {
   style?: StyleProp<ViewStyle>;
   brushColor?: string;
@@ -28,11 +32,13 @@ interface InkEditorNativeProps {
   brushFamily?: 'pen' | 'marker' | 'highlighter';
   mode?: 'draw' | 'text';
   onStrokesChange?: (event: NativeSyntheticEvent<StrokesChangeEvent>) => void;
+  onTextFieldsChange?: (event: NativeSyntheticEvent<TextFieldsChangeEvent>) => void;
 }
 
 export interface InkEditorRef {
   clear: () => void;
   loadStrokes: (strokesJson: string) => void;
+  loadTextFields: (textFieldsJson: string) => void;
 }
 
 export type InkEditorBrushFamily = 'pen' | 'marker' | 'highlighter';
@@ -78,10 +84,20 @@ export interface InkEditorProps {
    */
   initialStrokes?: string;
   /**
+   * Initial text fields to load when the editor mounts.
+   * This should be a JSON string from a previous save.
+   */
+  initialTextFields?: string;
+  /**
    * Callback fired when strokes change (after a stroke is finished or cleared).
    * The callback receives a serialized JSON string of all strokes.
    */
   onStrokesChange?: (strokesJson: string) => void;
+  /**
+   * Callback fired when text fields change.
+   * The callback receives a serialized JSON string of all text fields.
+   */
+  onTextFieldsChange?: (textFieldsJson: string) => void;
 }
 
 const NativeInkEditor =
@@ -105,12 +121,15 @@ export const InkEditor = forwardRef<InkEditorRef, InkEditorProps>(
       brushFamily = 'pen',
       mode = 'draw',
       initialStrokes,
+      initialTextFields,
       onStrokesChange,
+      onTextFieldsChange,
     },
     ref,
   ) => {
     const nativeRef = useRef(null);
     const hasLoadedInitialStrokes = useRef(false);
+    const hasLoadedInitialTextFields = useRef(false);
 
     const dispatchCommand = (commandName: string, args: unknown[] = []) => {
       if (Platform.OS === 'android' && nativeRef.current) {
@@ -133,6 +152,9 @@ export const InkEditor = forwardRef<InkEditorRef, InkEditorProps>(
       loadStrokes: (strokesJson: string) => {
         dispatchCommand('loadStrokes', [strokesJson]);
       },
+      loadTextFields: (textFieldsJson: string) => {
+        dispatchCommand('loadTextFields', [textFieldsJson]);
+      },
     }));
 
     // Load initial strokes when the component mounts
@@ -151,10 +173,32 @@ export const InkEditor = forwardRef<InkEditorRef, InkEditorProps>(
       }
     }, [initialStrokes]);
 
+    // Load initial text fields when the component mounts
+    useEffect(() => {
+      if (
+        initialTextFields &&
+        !hasLoadedInitialTextFields.current &&
+        nativeRef.current
+      ) {
+        // Small delay to ensure the native view is ready
+        const timer = setTimeout(() => {
+          dispatchCommand('loadTextFields', [initialTextFields]);
+          hasLoadedInitialTextFields.current = true;
+        }, 100);
+        return () => clearTimeout(timer);
+      }
+    }, [initialTextFields]);
+
     const handleStrokesChange = (
       event: NativeSyntheticEvent<StrokesChangeEvent>,
     ) => {
       onStrokesChange?.(event.nativeEvent.strokes);
+    };
+
+    const handleTextFieldsChange = (
+      event: NativeSyntheticEvent<TextFieldsChangeEvent>,
+    ) => {
+      onTextFieldsChange?.(event.nativeEvent.textFields);
     };
 
     if (Platform.OS !== 'android' || !NativeInkEditor) {
@@ -171,6 +215,7 @@ export const InkEditor = forwardRef<InkEditorRef, InkEditorProps>(
         brushFamily={brushFamily}
         mode={mode}
         onStrokesChange={handleStrokesChange}
+        onTextFieldsChange={handleTextFieldsChange}
       />
     );
   },

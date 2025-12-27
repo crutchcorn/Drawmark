@@ -6,7 +6,7 @@ import { InkEditorBrushInfo, InkEditorMode } from '../../components/InkEditor';
 import { Colors } from './constants/colors';
 
 export function HomeView() {
-  const { canvasRef, initialStrokes, isLoading, handleStrokesChange } =
+  const { canvasRef, initialStrokes, initialTextFields, isLoading, handleStrokesChange, handleTextFieldsChange } =
     useInkCanvasPersistence('main-canvas');
 
   const [brushInfo, setBrushInfo] = useState({
@@ -25,7 +25,9 @@ export function HomeView() {
     <HomeUI
       canvasRef={canvasRef}
       initialStrokes={initialStrokes}
+      initialTextFields={initialTextFields}
       handleStrokesChange={handleStrokesChange}
+      handleTextFieldsChange={handleTextFieldsChange}
       brushInfo={brushInfo}
       setBrushInfo={setBrushInfo}
       editingMode={editingMode}
