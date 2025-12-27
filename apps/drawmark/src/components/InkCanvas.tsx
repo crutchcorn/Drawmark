@@ -1,14 +1,7 @@
-import React, {
-  forwardRef,
-  useImperativeHandle,
-  useRef,
-  useEffect,
-} from 'react';
+import React, { forwardRef } from 'react';
 import {
   requireNativeComponent,
-  UIManager,
   Platform,
-  findNodeHandle,
   StyleSheet,
   ViewStyle,
   StyleProp,
@@ -18,11 +11,12 @@ const COMPONENT_NAME = 'InkCanvasView';
 
 interface InkCanvasNativeProps {
   style?: StyleProp<ViewStyle>;
+  initialStrokes?: string;
+  initialTextFields?: string;
 }
 
 export interface InkCanvasRef {
-  loadStrokes: (strokesJson: string) => void;
-  loadTextFields: (textFieldsJson: string) => void;
+  // Currently no imperative methods needed for read-only canvas
 }
 
 export interface InkCanvasProps {
@@ -52,72 +46,17 @@ const NativeInkCanvas =
  */
 export const InkCanvas = forwardRef<InkCanvasRef, InkCanvasProps>(
   ({ style, initialStrokes, initialTextFields }, ref) => {
-    const nativeRef = useRef(null);
-    const hasLoadedInitialStrokes = useRef(false);
-
-    const dispatchCommand = (commandName: string, args: unknown[] = []) => {
-      if (Platform.OS === 'android' && nativeRef.current) {
-        const commands =
-          UIManager.getViewManagerConfig(COMPONENT_NAME)?.Commands;
-        if (commands?.[commandName] !== undefined) {
-          UIManager.dispatchViewManagerCommand(
-            findNodeHandle(nativeRef.current),
-            commands[commandName],
-            args,
-          );
-        }
-      }
-    };
-
-    useImperativeHandle(ref, () => ({
-      loadStrokes: (strokesJson: string) => {
-        dispatchCommand('loadStrokes', [strokesJson]);
-      },
-      loadTextFields: (textFieldsJson: string) => {
-        dispatchCommand('loadTextFields', [textFieldsJson]);
-      }
-    }));
-
-    // Load initial strokes when the component mounts
-    useEffect(() => {
-      if (
-        initialStrokes &&
-        !hasLoadedInitialStrokes.current &&
-        nativeRef.current
-      ) {
-        // Small delay to ensure the native view is ready
-        const timer = setTimeout(() => {
-          dispatchCommand('loadStrokes', [initialStrokes]);
-          hasLoadedInitialStrokes.current = true;
-        }, 100);
-        return () => clearTimeout(timer);
-      }
-    }, [initialStrokes]);
-
-    // Load initial text fields when the component mounts
-    const hasLoadedInitialTextFields = useRef(false);
-    useEffect(() => {
-      if (
-        initialTextFields &&
-        !hasLoadedInitialTextFields.current &&
-        nativeRef.current
-      ) {
-        // Small delay to ensure the native view is ready
-        const timer = setTimeout(() => {
-          dispatchCommand('loadTextFields', [initialTextFields]);
-          hasLoadedInitialTextFields.current = true;
-        }, 100);
-        return () => clearTimeout(timer);
-      }
-    }, [initialTextFields]);
-
     if (Platform.OS !== 'android' || !NativeInkCanvas) {
       // Return null or a placeholder for non-Android platforms
       return null;
     }
 
     return (
-      <NativeInkCanvas ref={nativeRef} style={[styles.container, style]} />
+      <NativeInkCanvas
+        style={[styles.container, style]}
+        initialStrokes={initialStrokes}
+        initialTextFields={initialTextFields}
+      />
     );
   },
 );

@@ -1,9 +1,6 @@
 package app.drawmark.ink
 
 import android.graphics.Color
-import android.view.Choreographer
-import android.view.View
-import android.view.ViewGroup
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableArray
@@ -20,8 +17,6 @@ class InkEditorViewManager(
     companion object {
         const val REACT_CLASS = "InkEditorView"
         const val COMMAND_CLEAR = 1
-        const val COMMAND_LOAD_STROKES = 2
-        const val COMMAND_LOAD_TEXT_FIELDS = 3
     }
 
     override fun getName(): String = REACT_CLASS
@@ -88,25 +83,25 @@ class InkEditorViewManager(
         }
     }
 
+    @ReactProp(name = "initialStrokes")
+    fun setInitialStrokes(view: InkEditorView, strokesJson: String?) {
+        strokesJson?.let { view.loadStrokes(it) }
+    }
+
+    @ReactProp(name = "initialTextFields")
+    fun setInitialTextFields(view: InkEditorView, textFieldsJson: String?) {
+        textFieldsJson?.let { view.loadTextFields(it) }
+    }
+
     override fun getCommandsMap(): Map<String, Int> {
         return mapOf(
-            "clear" to COMMAND_CLEAR,
-            "loadStrokes" to COMMAND_LOAD_STROKES,
-            "loadTextFields" to COMMAND_LOAD_TEXT_FIELDS
+            "clear" to COMMAND_CLEAR
         )
     }
 
     override fun receiveCommand(view: InkEditorView, commandId: String?, args: ReadableArray?) {
         when (commandId) {
             "clear" -> view.clearCanvas()
-            "loadStrokes" -> {
-                val strokesJson = args?.getString(0) ?: ""
-                view.loadStrokes(strokesJson)
-            }
-            "loadTextFields" -> {
-                val textFieldsJson = args?.getString(0) ?: ""
-                view.loadTextFields(textFieldsJson)
-            }
         }
     }
 
@@ -114,14 +109,6 @@ class InkEditorViewManager(
     override fun receiveCommand(view: InkEditorView, commandId: Int, args: ReadableArray?) {
         when (commandId) {
             COMMAND_CLEAR -> view.clearCanvas()
-            COMMAND_LOAD_STROKES -> {
-                val strokesJson = args?.getString(0) ?: ""
-                view.loadStrokes(strokesJson)
-            }
-            COMMAND_LOAD_TEXT_FIELDS -> {
-                val textFieldsJson = args?.getString(0) ?: ""
-                view.loadTextFields(textFieldsJson)
-            }
         }
     }
 }

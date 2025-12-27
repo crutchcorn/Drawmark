@@ -1,9 +1,4 @@
-import React, {
-  forwardRef,
-  useImperativeHandle,
-  useRef,
-  useEffect,
-} from 'react';
+import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import {
   requireNativeComponent,
   UIManager,
@@ -31,14 +26,16 @@ interface InkEditorNativeProps {
   brushSize?: number;
   brushFamily?: 'pen' | 'marker' | 'highlighter';
   mode?: 'draw' | 'text';
+  initialStrokes?: string;
+  initialTextFields?: string;
   onStrokesChange?: (event: NativeSyntheticEvent<StrokesChangeEvent>) => void;
-  onTextFieldsChange?: (event: NativeSyntheticEvent<TextFieldsChangeEvent>) => void;
+  onTextFieldsChange?: (
+    event: NativeSyntheticEvent<TextFieldsChangeEvent>,
+  ) => void;
 }
 
 export interface InkEditorRef {
   clear: () => void;
-  loadStrokes: (strokesJson: string) => void;
-  loadTextFields: (textFieldsJson: string) => void;
 }
 
 export type InkEditorBrushFamily = 'pen' | 'marker' | 'highlighter';
@@ -128,8 +125,6 @@ export const InkEditor = forwardRef<InkEditorRef, InkEditorProps>(
     ref,
   ) => {
     const nativeRef = useRef(null);
-    const hasLoadedInitialStrokes = useRef(false);
-    const hasLoadedInitialTextFields = useRef(false);
 
     const dispatchCommand = (commandName: string, args: unknown[] = []) => {
       if (Platform.OS === 'android' && nativeRef.current) {
@@ -149,49 +144,7 @@ export const InkEditor = forwardRef<InkEditorRef, InkEditorProps>(
       clear: () => {
         dispatchCommand('clear');
       },
-      loadStrokes: (strokesJson: string) => {
-        dispatchCommand('loadStrokes', [strokesJson]);
-      },
-      loadTextFields: (textFieldsJson: string) => {
-        dispatchCommand('loadTextFields', [textFieldsJson]);
-      },
     }));
-
-    // Load initial strokes when the component mounts
-    useEffect(() => {
-      if (
-        initialStrokes &&
-        !hasLoadedInitialStrokes.current &&
-        nativeRef.current
-      ) {
-        // Small delay to ensure the native view is ready
-        const timer = setTimeout(() => {
-          dispatchCommand('loadStrokes', [initialStrokes]);
-          hasLoadedInitialStrokes.current = true;
-        }, 100);
-        return () => clearTimeout(timer);
-      }
-    }, [initialStrokes]);
-
-    // Load initial text fields when the component mounts
-    useEffect(() => {
-      console.log('[InkEditor] useEffect for initialTextFields:', initialTextFields);
-      console.log('[InkEditor] hasLoadedInitialTextFields:', hasLoadedInitialTextFields.current);
-      console.log('[InkEditor] nativeRef.current:', nativeRef.current ? 'exists' : 'null');
-      if (
-        initialTextFields &&
-        !hasLoadedInitialTextFields.current &&
-        nativeRef.current
-      ) {
-        // Small delay to ensure the native view is ready
-        const timer = setTimeout(() => {
-          console.log('[InkEditor] Dispatching loadTextFields command with:', initialTextFields);
-          dispatchCommand('loadTextFields', [initialTextFields]);
-          hasLoadedInitialTextFields.current = true;
-        }, 100);
-        return () => clearTimeout(timer);
-      }
-    }, [initialTextFields]);
 
     const handleStrokesChange = (
       event: NativeSyntheticEvent<StrokesChangeEvent>,
@@ -202,8 +155,6 @@ export const InkEditor = forwardRef<InkEditorRef, InkEditorProps>(
     const handleTextFieldsChange = (
       event: NativeSyntheticEvent<TextFieldsChangeEvent>,
     ) => {
-      console.log('[InkEditor] handleTextFieldsChange received:', event.nativeEvent.textFields);
-      console.log('[InkEditor] onTextFieldsChange callback is:', onTextFieldsChange ? 'set' : 'undefined');
       onTextFieldsChange?.(event.nativeEvent.textFields);
     };
 
@@ -220,6 +171,8 @@ export const InkEditor = forwardRef<InkEditorRef, InkEditorProps>(
         brushSize={brushSize}
         brushFamily={brushFamily}
         mode={mode ?? undefined}
+        initialStrokes={initialStrokes}
+        initialTextFields={initialTextFields}
         onStrokesChange={handleStrokesChange}
         onTextFieldsChange={handleTextFieldsChange}
       />
